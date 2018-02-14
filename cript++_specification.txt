@@ -1,0 +1,33 @@
+Cript++ tänker vi är ett imperativt språk inspirerat av Javascript med fokus på statisk typning ala C++.
+Alltså en mjuk statisk typning där super tar in vad som helst utan att bråka.
+Språket bör innehålla tilldelning, villkor och repetitionssatser samt funktioner. Språket bör vara lexikaliskt
+scope med viss inspiration av C++s minneshantering. 
+Det bör vara nyckelordsstyrt. Repetitioner ska kunna avbrytas med break, 
+och funktioner med en return-sats.
+
+
+Variabeltyper:
+    int, float, char, super?, Classer
+
+Containers:  
+    Tuple där du själv definierar typningen av paret
+    Array numrerade och/eller associativa
+
+Funktioner:
+    rekursiva
+    Överlagring?
+
+Inbyggda moduler? 
+    Ska allt finnas från början eller ska man kunna importera moduler/libraries?
+
+foo(int a){
+    int x = 1;
+    print(x);
+    return x + a;
+}
+
+int x = foo(rand(0,9));
+
+if(x >= 5){
+
+}
