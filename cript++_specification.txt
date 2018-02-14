@@ -16,6 +16,7 @@ Containers:
 Funktioner:
     rekursiva
     Överlagring?
+    
 
 Inbyggda moduler? 
     Ska allt finnas från början eller ska man kunna importera moduler/libraries?
@@ -29,5 +30,30 @@ foo(int a){
 int x = foo(rand(0,9));
 
 if(x >= 5){
-
+    print("wow nice");
+} else {
+    print("go die");
 }
+
+**** global variabel? ****
+global float glob = 0.0
+**** global ****
+global glob = 1.0
+
+**** Kanske? ****
+Array a = [[1,2,3], [1,2,3], [1,2,3]]
+
+forfor(int i,j = 0,0; i < len(a), j < len(a[j]); i,j++){
+    print(a[j]);
+}
+**** Kanske? ****
+
+eller rekursiv foor som går igenom alla element?
+
+Konvertering mellan typer?
+    string -> int ta längd av string?
+    char -> int ta ascii värde?
+    int -> float lägg till .0?
+    float -> int trunkera?
+    super -> vald data typ
+    
