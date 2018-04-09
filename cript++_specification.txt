@@ -5,13 +5,31 @@ scope med viss inspiration av C++s minneshantering.
 Det bör vara nyckelordsstyrt. Repetitioner ska kunna avbrytas med break, 
 och funktioner med en return-sats.
 
-
 Variabeltyper:
-    int, float, char, super?, Classer
+    Classer
+        Arketyp klasser är Int Float, Char
+
+    Int
+        Integers alla tal mellan -2 miljoner och 2 miljoner
+
+    Float
+        Decimal tal
+
+    Char 
+        En specifik char. En sträng är en lista av dessa
+        Char sparas som en int baserat på UTF-8 tabellen
+        Char kan därför muteras och 'a' + 'a' = 'b' 
+        Char skrivs med "" eller '' 
+
+    Super
+        Super antar typen för det angivna elementet. Sedan ses variabeln som den nya typen.
+
+
 
 Containers:  
     Tuple där du själv definierar typningen av paret
-    Array numrerade och/eller associativa
+    Array numrerade och/eller associativa ej hashes och lists bara arrayer!
+    String är en array av Chars => String a = 'hej' a[1] = 'e' str(1) => 'a'
 
 Funktioner:
     rekursiva
@@ -30,4 +48,61 @@ int x = foo(rand(0,9));
 
 if(x >= 5){
 
+}
+
+:PROGRAM{
+   :STMTLIST
+
+
+}
+:STMTLIST{
+    :STMT, :STMTLIST
+    :STMT
+}
+
+:STMT{
+    :ASSIGN
+    :EXPR
+}
+:ASSIGN{
+    :VARIABLE_TYPE, :VARIABLE, :EXPR
+}
+:VARIABLE_TYPE{
+    match(/[a-zA-Z0-9]/)
+}
+:EXPR{
+    :TERM
+}
+:TERM{
+    :INT
+    :CHAR
+    :BOOL
+    :CLASS
+    :SUPER
+    :VARIABLE
+}
+:INT{
+    match(Integer)
+}
+:CHAR{
+    match(Char)
+}
+:BOOL{
+    match("true"){true}
+    match("false"){false}
+}
+:CLASS{
+    ???
+}
+:SUPER{
+    :INT
+    :CHAR
+    :BOOL
+    :CLASS
+}
+:VARIABLE{
+}
+:STMT{
+    :FUNCTION
+    :STD_FUNCTION
 }
