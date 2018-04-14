@@ -1,5 +1,5 @@
 require_relative "rdparse"
-require_relative "cript_archetypes"
+require_relative "cript_classes"
 
 ##############################################################################
 #
@@ -77,8 +77,6 @@ class Cript
          match(:VARIABLE_TYPE, :VARIABLE_NAME, '=',  :EXPR, ';'){|type, name, _, value, _|
           ASSIGN.new(type.upcase, name, value, 0)
          }
-
-
      end
 
        rule :EXPR do
@@ -93,7 +91,7 @@ class Cript
       end 
 
       rule :VARIABLE_NAME do
-        match(/[a-zA-Z\-\_0-9]+/){|m| m}
+        match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/){|m| m}
       end
     #  rule :TERM do
     #      # :INT
@@ -118,14 +116,9 @@ class Cript
   end
 
   def run
+    print_variable_table()
 
-    ALL_VARIABLES.each_with_index { |scope_variables, scope|
-      puts "\nScope: " + scope.to_s
-      for x in 0 .. scope_variables.length-1 do    
-        print "Variable Name: " + scope_variables.keys[x].to_s+" \n   value: "+scope_variables[scope_variables.keys[x]].to_s + "\n"
-      end
-    }
-    print "[Cript++]"
+    print "[Cript++]~ "
     str = gets
     if done(str) then
       puts "Bye."
@@ -135,23 +128,28 @@ class Cript
     end
   end
 
-  def log(state = true)
+  def log(state = false)
     if state
       @diceParser.logger.level = Logger::DEBUG
     else
       @diceParser.logger.level = Logger::WARN
     end
   end
+
+  def print_variable_table(state = true) 
+    if state 
+      ALL_VARIABLES.each_with_index { |scope_variables, scope|
+      puts "\nScope: " + scope.to_s
+      for x in 0 .. scope_variables.length-1 do    
+        print "\nVariable Name: " + scope_variables.keys[x].to_s + "{"
+        print "\n   Value: "+scope_variables[scope_variables.keys[x]].val.to_s + ","
+        print "\n   Datatype: " + scope_variables[scope_variables.keys[x]].type.to_s + "\n}\n\n"
+      end
+    }
+    end
+  end 
+
+
 end
 
-# Examples of use
 
-# irb(main):1696:0> DiceRoller.new.roll
-# [diceroller] 1+3
-# => 4
-# [diceroller] 1+d4
-# => 2
-# [diceroller] 1+d4
-# => 3
-# [diceroller] (2+8*d20)*3d6
-# => 306
