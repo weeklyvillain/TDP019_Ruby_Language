@@ -68,7 +68,6 @@ forfor(int i,j = 0,0; i < len(a), j < len(a[j]); i,j++){
 
 eller rekursiv foor som går igenom alla element?
 
-<<<<<<< HEAD
 }
 
 :PROGRAM{
@@ -127,12 +126,3 @@ eller rekursiv foor som går igenom alla element?
     :FUNCTION
     :STD_FUNCTION
 }
-=======
-Konvertering mellan typer?
-    string -> int ta längd av string?
-    char -> int ta ascii värde?
-    int -> float lägg till .0?
-    float -> int trunkera?
-    super -> vald data typ
-    
->>>>>>> 3df8590de129d8e3c5182f68539c71694ba6f21d

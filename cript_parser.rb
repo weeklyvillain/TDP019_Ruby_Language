@@ -1,5 +1,6 @@
 require_relative "rdparse"
-require_relative "cript_archetype"
+require_relative "cript_archetypes"
+
 ##############################################################################
 #
 # This part defines the Cript Language
@@ -9,9 +10,13 @@ require_relative "cript_archetype"
 class Cript
   def initialize
     @Cript = Parser.new("Cript") do
-        """ Spaces and tabs"""
+        
+      """ Spaces and tabs"""
         token(/[\s\n]+/)
         token(/\t+/)
+
+        """ Separators """
+        token(/^\;/) { |m| m }
 
         """ Variable Typing """
         #token(/Bool/) {|m| m}
@@ -22,6 +27,7 @@ class Cript
 
         token(/Char/) {|m| m}
         token(/String/) {|m| m}
+        
         #token(/Array/) {|m| m}
 
         #token(/TRUE/) {|m| m }
@@ -64,17 +70,17 @@ class Cript
       end
 
       rule :ASSIGN do
-         match('Integer', :VARIABLE, '=', Integer){|_, name, _, value|
-             tmp = INT.new(value)
+         match('Integer', :VARIABLE, '=', Integer, ';'){|_, name, _, value, _|
+          ASSIGN.new(Integer, name, value, 0)
          }
-         match('Float', :VARIABLE, '=', Float){|_, name, _, value|
-             tmp = FLOAT.new(value)
+         match('Float', :VARIABLE, '=', Float, ';'){|_, name, _, value, _|
+          ASSIGN.new(Float, name, value, 0)
          }
-         match('Char', :VARIABLE, '=', '\'', String, '\''){|_, name, _, _, value, _|
-             tmp = CHAR.new(value)
+         match('Char', :VARIABLE, '=', '\'', String, '\'', ';'){|_, name, _, _, value, _, _|
+          ASSIGN.new(String, name, value, 0)
          }
-         match('String', :VARIABLE, '=', '\'', String, '\''){|_, name, _, _,value,_|
-             tmp = STRING.new(value)
+         match('String', :VARIABLE, '=', '\'', String, '\'', ';'){|_, name, _, _,value, _, _|
+          ASSIGN.new(String, name, value, 0)
          }
      end
 
@@ -107,7 +113,14 @@ class Cript
   end
 
   def run
-    print "[Cript++] "
+
+    ALL_VARIABLES.each_with_index { |scope_variables, scope|
+      puts "\nScope: " + scope.to_s
+      for x in 0 .. scope_variables.length-1 do    
+        print "Variable Name: " + scope_variables.keys[x].to_s+" \n   value: "+scope_variables[scope_variables.keys[x]].to_s + "\n"
+      end
+    }
+    print "[Cript++]"
     str = gets
     if done(str) then
       puts "Bye."

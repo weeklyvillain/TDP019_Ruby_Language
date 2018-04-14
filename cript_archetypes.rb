@@ -1,18 +1,23 @@
-$variables = {[]}
 
-####################### Assignment ##############################
+
+ALL_VARIABLES = [{}]
+
+"""********** Assignment **********"""
 class ASSIGN
-	attr_accessor :value, :type
-	def initialize (value)
-		@value = value
-		@type = :INT
+	attr_accessor :type
+	def initialize (variable_type, variable_name, variable_value, scope)
+		@type = :ASSIGN
+		@variable_type = variable_type
+		@variable_name = variable_name
+		@variable_value = variable_value
+		@scope = scope
 	end
 	def val()
-		return @value
+		ALL_VARIABLES[@scope][@variable_name] = @variable_value
 	end
 end
 
-####################### INT ##############################
+"""********** INT **********"""
 class INT
 	attr_accessor :value, :type
 	def initialize (value)
@@ -24,7 +29,7 @@ class INT
 	end
 end
 
-####################### FLOAT ##############################
+"""********** FLOAT **********"""
 class FLOAT
 	attr_accessor :value, :type
 	def initialize (value)
@@ -36,7 +41,7 @@ class FLOAT
 	end
 end
 
-####################### CHAR ##############################
+"""********** CHAR **********"""
 class CHAR
 	attr_accessor :value, :type
 	def initialize (value)
@@ -45,11 +50,10 @@ class CHAR
 	end
 	def val()
 		return @value.val().chr(Encoding::UTF_8)
-
 	end
 end
 
-####################### STRING ##############################
+"""********** STRING **********"""
 class STRING
 	attr_accessor :value, :type
 	def initialize (value)
@@ -61,7 +65,7 @@ class STRING
 	end
 end
 
-####################### BOOL ##############################
+"""********** BOOL **********"""
 class BOOL
 	attr_accessor :value,:type
 	def initialize (value)
