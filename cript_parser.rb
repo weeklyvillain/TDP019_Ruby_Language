@@ -19,11 +19,12 @@ class Cript
         token(/^\;/) { |m| m }
 
         """ Variable Typing """
-        #token(/Bool/) {|m| m}
+        token(/Bool/) {|m| m}
         token(/Float/) {|m| m}
-        token(/\d+\.\d+/) {|m| m.to_f}
+        token(/\d+\.\d+/) {|m| m}
+
         token(/Integer/) {|m| m}
-        token(/\d+/) {|m| m.to_i}
+        token(/\d+/) {|m| m}
 
         token(/Char/) {|m| m}
         token(/String/) {|m| m}
@@ -70,24 +71,30 @@ class Cript
       end
 
       rule :ASSIGN do
-         match('Integer', :VARIABLE, '=', Integer, ';'){|_, name, _, value, _|
-          ASSIGN.new(Integer, name, value, 0)
+         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', /[',"]/,  :EXPR, /[',"]/, ';'){|type, name, _, _, value, _, _|
+          ASSIGN.new(type.upcase, name, value, 0)
          }
-         match('Float', :VARIABLE, '=', Float, ';'){|_, name, _, value, _|
-          ASSIGN.new(Float, name, value, 0)
+         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=',  :EXPR, ';'){|type, name, _, value, _|
+          ASSIGN.new(type.upcase, name, value, 0)
          }
-         match('Char', :VARIABLE, '=', '\'', String, '\'', ';'){|_, name, _, _, value, _, _|
-          ASSIGN.new(String, name, value, 0)
-         }
-         match('String', :VARIABLE, '=', '\'', String, '\'', ';'){|_, name, _, _,value, _, _|
-          ASSIGN.new(String, name, value, 0)
-         }
+
+
      end
 
        rule :EXPR do
            match(/.*/){|m| m}
        end
 
+      rule :VARIABLE_TYPE do
+        match(/Integer/){|m|m}
+        match(/Float/){|m|m}
+        match(/Char/){|m|m}
+        match(/String/){|m|m}
+      end 
+
+      rule :VARIABLE_NAME do
+        match(/[a-zA-Z\-\_0-9]+/){|m| m}
+      end
     #  rule :TERM do
     #      # :INT
     #       #:CHAR
@@ -97,9 +104,7 @@ class Cript
     #       #:VARIABLE
     #   end
 
-      rule :VARIABLE do
-          match(/[a-zA-Z\-\_]+/){|m| m}
-      end
+
       #:STMT{
     #      :FUNCTION
     #      :STD_FUNCTION

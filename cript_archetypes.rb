@@ -1,8 +1,6 @@
-
-
 ALL_VARIABLES = [{}]
 
-"""********** Assignment **********"""
+"""********** ASSIGN **********"""
 class ASSIGN
 	attr_accessor :type
 	def initialize (variable_type, variable_name, variable_value, scope)
@@ -13,12 +11,12 @@ class ASSIGN
 		@scope = scope
 	end
 	def val()
-		ALL_VARIABLES[@scope][@variable_name] = @variable_value
+		ALL_VARIABLES[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
 	end
 end
 
-"""********** INT **********"""
-class INT
+"""********** INTEGER **********"""
+class INTEGER
 	attr_accessor :value, :type
 	def initialize (value)
 		@value = value
@@ -45,7 +43,7 @@ end
 class CHAR
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = INT.new(value.to_i)
+		@value = INTEGER.new(value.to_i)
 		@type = :CHAR
 	end
 	def val()
@@ -57,7 +55,7 @@ end
 class STRING
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = INT.new(value.to_i)
+		@value = INTEGER.new(value.to_i)
 		@type = :STRING
 	end
 	def val()
