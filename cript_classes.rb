@@ -17,25 +17,32 @@ class ASSIGN
 	def val()
 		if !ALL_VARIABLES[@scope].key?(@variable_name)
 			ALL_VARIABLES[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
-			ALL_VARIABLES[@scope][@variable_name].val
+			ALL_VARIABLES[@scope][@variable_name]
 		else
-			print "ERROR! Re-initializing a Variable!"
-		end
-		
+			ALL_VARIABLES[@scope][@variable_name]
+		end	
 	end
 end
 
-class LOOKUP
-
-    def initialize(variable_name, starting_scope)
-        
+"""class LOOKUP
+    attr_accessor :variable_name, :starting_scope
+    def initialize(variable_name, starting_scope)     
+        @variable_name = variable_name
+        @starting_scope = starting_scope;
     end
-    def val()
-    
+    def val(scope = @starting_scope)
+        if ALL_VARIABLES[scope].key?(@variable_name)
+            return ALL_VARIABLES[scope][@variable_name].val
+        else
+            if scope-1 >= 0
+                self.val(scope-1)
+            else
+                return 
+            end
+        end
     end
-
 end
-
+"""
 
         """ Containers """
 

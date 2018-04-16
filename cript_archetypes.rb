@@ -14,7 +14,7 @@ end
 class FLOAT_C
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = value.fo_f
+		@value = value.to_f
 		@type = :FLOAT
 	end
 	def val()
@@ -35,7 +35,7 @@ class CHAR_C
 end
 
 """********** BOOL **********"""
-class BOOL
+class BOOL_C
 	attr_accessor :value,:type
 	def initialize (value)
         @value = value

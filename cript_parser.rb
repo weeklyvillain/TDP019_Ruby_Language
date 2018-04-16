@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require_relative "rdparse"
 require_relative "cript_classes"
 
@@ -28,6 +29,7 @@ class Cript
 
         token(/Char/) {|m| m}
         token(/String/) {|m| m}
+        token(/["|'][a-zA-Z\_\,\. ]*["|']/){|m|m}
         
         #token(/Array/) {|m| m}
 
@@ -65,28 +67,32 @@ class Cript
           match(:STMT)
       end
 
-     rule :STMT do
-            match(:ASSIGN){|m| m}
-            match(:EXPR){|m| m}
-      end
+    rule :STMT do
+
+      match(:ASSIGN){|m| m}
+      #match(:EXPR){|m| m}
+    end
 
       rule :ASSIGN do
-         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', /[',"]?/, :EXPR, /[',"]?/, ';'){|type, name, _, _, value, _, _|
-          ASSIGN.new(type.upcase + "_C", name, value, 0)
-         }
+        match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', /["|']/, :EXPR, /["|']/, ';'){|type, name, _, _, value, _, _|
+          ASSIGN.new(type + "_C", name, value[1..-2], 0)
+         } 
+        match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', :EXPR, ';'){|type, name, _, value, _|
+        ASSIGN.new(type + "_C", name, value, 0)
+       } 
+
      end
 
        rule :EXPR do
-          match(:VARIABLE_NAME){|m| }
-          match(/.*/){|m| m}
+        match(:VARIABLE_NAME){|m| m}
+        match(/.*/){|m|m}
        end
 
       rule :VARIABLE_TYPE do
-        match(/Integer/){|m|m}
-        match(/Float/){|m|m}
-        match(/Char/){|m|m}
-        match(/String/){|m|m}
-
+        match(/Integer/){|m|m.upcase}
+        match(/Float/){|m|m.upcase}
+        match(/Char/){|m|m.upcase}
+        match(/String/){|m|m.upcase}
       end 
 
       rule :VARIABLE_NAME do
@@ -149,8 +155,6 @@ class Cript
   end 
 end
 
-
 if __FILE__ == $0
-    puts "=> #{@Cript.parse $1}"
+  Cript.new.run()
 end
-
