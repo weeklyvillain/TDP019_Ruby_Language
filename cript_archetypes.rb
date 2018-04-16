@@ -1,8 +1,8 @@
 """********** INTEGER **********"""
-class INTEGER
+class INTEGER_C
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = value
+		@value = value.to_i
 		@type = :INT
 	end
 	def val()
@@ -11,10 +11,10 @@ class INTEGER
 end
 
 """********** FLOAT **********"""
-class FLOAT
+class FLOAT_C
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = value
+		@value = value.fo_f
 		@type = :FLOAT
 	end
 	def val()
@@ -23,14 +23,14 @@ class FLOAT
 end
 
 """********** CHAR **********"""
-class CHAR
+class CHAR_C
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = INTEGER.new(value.to_i)
+		@value = INTEGER_C.new(value.ord)
 		@type = :CHAR
 	end
 	def val()
-		return @value.val().chr(Encoding::UTF_8)
+		return @value.val().chr()
 	end
 end
 

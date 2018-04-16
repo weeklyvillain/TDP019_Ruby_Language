@@ -67,20 +67,18 @@ class Cript
 
      rule :STMT do
             match(:ASSIGN){|m| m}
-            # match(:EXPR){}
+            match(:EXPR){|m| m}
       end
 
       rule :ASSIGN do
-         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', /[',"]/,  :EXPR, /[',"]/, ';'){|type, name, _, _, value, _, _|
-          ASSIGN.new(type.upcase, name, value, 0)
-         }
-         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=',  :EXPR, ';'){|type, name, _, value, _|
-          ASSIGN.new(type.upcase, name, value, 0)
+         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', /[',"]?/, :EXPR, /[',"]?/, ';'){|type, name, _, _, value, _, _|
+          ASSIGN.new(type.upcase + "_C", name, value, 0)
          }
      end
 
        rule :EXPR do
-           match(/.*/){|m| m}
+          match(:VARIABLE_NAME){|m| }
+          match(/.*/){|m| m}
        end
 
       rule :VARIABLE_TYPE do
@@ -88,6 +86,7 @@ class Cript
         match(/Float/){|m|m}
         match(/Char/){|m|m}
         match(/String/){|m|m}
+
       end 
 
       rule :VARIABLE_NAME do
@@ -148,8 +147,10 @@ class Cript
     }
     end
   end 
-
-
 end
 
+
+if __FILE__ == $0
+    puts "=> #{@Cript.parse $1}"
+end
 
