@@ -18,31 +18,82 @@ class ASSIGN
 		if !ALL_VARIABLES[@scope].key?(@variable_name)
 			ALL_VARIABLES[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
 			ALL_VARIABLES[@scope][@variable_name]
-		else
-			ALL_VARIABLES[@scope][@variable_name]
 		end	
 	end
 end
 
-"""class LOOKUP
+class LOOKUP
     attr_accessor :variable_name, :starting_scope
     def initialize(variable_name, starting_scope)     
         @variable_name = variable_name
         @starting_scope = starting_scope;
     end
-    def val(scope = @starting_scope)
-        if ALL_VARIABLES[scope].key?(@variable_name)
-            return ALL_VARIABLES[scope][@variable_name].val
+	def val(scope = @starting_scope)
+		if ALL_VARIABLES[scope].key?(@variable_name)
+			previous = ALL_VARIABLES[scope][@variable_name]
+			while true do
+				if previous.val().respond_to?(:val)
+					previous = previous.val()
+				else
+					return previous.val()
+				end
+			end
+            
         else
             if scope-1 >= 0
                 self.val(scope-1)
             else
-                return 
+				puts("Variable does not exit!")
+				return nil
             end
         end
     end
 end
-"""
+
+
+		"""Arithmetics"""
+
+class ADD
+	attr_accessor :value
+	def initialize(a, b)
+		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+	end
+	def val()
+		return @value1 + @value2
+	end
+end
+class SUBTRACT
+	attr_accessor :value
+	def initialize(a, b)
+		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+	end
+	def val()
+		return @value1 - @value2
+	end
+end
+class MULTIPLY
+	attr_accessor :value
+	def initialize(a, b)
+		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+	end
+	def val()
+		return @value1 * @value2
+	end
+end
+class DIVIDE
+	attr_accessor :value
+	def initialize(a, b)
+		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+	end
+	def val()
+		return @value1 / @value2
+	end
+end
+
 
         """ Containers """
 

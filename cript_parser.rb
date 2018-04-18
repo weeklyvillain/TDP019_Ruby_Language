@@ -22,19 +22,18 @@ class Cript
         """ Variable Typing """
         token(/Bool/) {|m| m}
         token(/Float/) {|m| m}
-        token(/\d+\.\d+/) {|m| m}
+        token(/\d+\.\d+/) {|m| m.to_f}
 
         token(/Integer/) {|m| m}
-        token(/\d+/) {|m| m}
+        token(/\d+/) {|m| m.to_i}
 
         token(/Char/) {|m| m}
         token(/String/) {|m| m}
-        token(/["|'][a-zA-Z\_\,\. ]*["|']/){|m|m}
         
         #token(/Array/) {|m| m}
 
-        #token(/TRUE/) {|m| m }
-        #token(/FALSE/) {|m| m }
+        token(/True/) {|m| m }
+        token(/False/) {|m| m }
 
         #token(/FOR/) {|m| :FOR }
         #token(/WHILE/) {|m| :WHILE }
@@ -54,6 +53,7 @@ class Cript
         #token(/||/) {|m| m }
         #token(/!/) {|m| m }
         token(/\w+/) {|m| m }
+        token(/["'][a-zA-Z\_\,\. ]+["']/){|m| m}
         token(/./){|m| m.to_s }
 
 
@@ -63,40 +63,56 @@ class Cript
      end
 
       rule :STMTLIST do
-          # match(:STMT, :STMTLIST){}
+          match(:STMT, :STMTLIST){}
           match(:STMT)
       end
 
     rule :STMT do
 
       match(:ASSIGN){|m| m}
-      #match(:EXPR){|m| m}
+      match(:EXPR){|m| m}
     end
 
       rule :ASSIGN do
-        match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', /["|']/, :EXPR, /["|']/, ';'){|type, name, _, _, value, _, _|
-          ASSIGN.new(type + "_C", name, value[1..-2], 0)
-         } 
+
         match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', :EXPR, ';'){|type, name, _, value, _|
-        ASSIGN.new(type + "_C", name, value, 0)
-       } 
+          ASSIGN.new(type + "_C", name, value, 0)
+        } 
 
      end
 
        rule :EXPR do
-        match(:VARIABLE_NAME){|m| m}
-        match(/.*/){|m|m}
-       end
+        match(:EXPR, '+', :TERM){ |a, _, b| ADD.new(a,b) }
+        match(:EXPR, '-', :TERM){ |a, _, b| SUBTRACT.new(a,b)}
+        match(:TERM)
+      end
+
+      rule :TERM do
+        match('True'){ true }
+        match('False'){ false }
+        match(:TERM, '*', :TERM){ |a, _, b| MULTIPLY.new(a, b) }
+        match(:TERM, '/', :TERM){ |a, _, b| DIVIDE.new(a, b) }
+        match(Integer){ |m| m }
+        match(Float){ |m| m }
+        match(:STR){ |m| m }
+        match(:VARIABLE_NAME){|m| LOOKUP.new(m, 0)}
+      end
+
 
       rule :VARIABLE_TYPE do
-        match(/Integer/){|m|m.upcase}
-        match(/Float/){|m|m.upcase}
-        match(/Char/){|m|m.upcase}
-        match(/String/){|m|m.upcase}
+        match(/Bool/){|m| m.upcase }
+        match(/Integer/){|m| m.upcase }
+        match(/Float/){|m| m.upcase }
+        match(/Char/){|m| m.upcase }
+        match(/String/){|m| m.upcase }
       end 
-
       rule :VARIABLE_NAME do
         match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/){|m| m}
+      end
+
+      rule :STR do 
+        match(/["'][a-zA-Z\_\,\. ]+["']/){|m| m[1..-2]}
+        match(/["']/, /["']/){""}
       end
     #  rule :TERM do
     #      # :INT
@@ -120,11 +136,21 @@ class Cript
     ["quit","exit","bye",""].include?(str.chomp)
   end
 
-  def run
+  def run(str = "")
     print_variable_table()
 
     print "[Cript++]~ "
-    str = gets
+    if str.length == 0
+      str = gets
+    else
+      if done(str) then
+        puts "Bye."
+      else
+        puts "=> #{@Cript.parse str}"
+       return
+      end
+    end
+    
     if done(str) then
       puts "Bye."
     else
@@ -156,5 +182,14 @@ class Cript
 end
 
 if __FILE__ == $0
-  Cript.new.run()
+  if ARGV.empty?
+    Cript.new.run()
+  else
+    f = ARGV[0]
+    file = File.open(f, "r")
+    parser = Cript.new
+    for line in file
+      parser.run(line)
+    end
+  end
 end

@@ -2,7 +2,7 @@
 class INTEGER_C
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = value.to_i
+		@value = value
 		@type = :INT
 	end
 	def val()
@@ -14,7 +14,7 @@ end
 class FLOAT_C
 	attr_accessor :value, :type
 	def initialize (value)
-		@value = value.to_f
+		@value = value
 		@type = :FLOAT
 	end
 	def val()

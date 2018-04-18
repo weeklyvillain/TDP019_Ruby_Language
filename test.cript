@@ -1,0 +1,5 @@
+Integer a = 100;
+Integer b = 50;
+Integer c = a - b;
+c
+exit
