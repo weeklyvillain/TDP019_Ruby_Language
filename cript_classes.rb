@@ -8,10 +8,10 @@ FUNCTIONS = [{}]
 
 """ *** ASSIGN and LOOKUP *** """
 
-class ASSIGN
+class ASSIGN_VAR
 	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
 	def initialize (variable_type, variable_name, variable_value, scope)
-		@type = :ASSIGN
+		@type = :ASSIGN_VAR
 		@variable_type = variable_type
 		@variable_name = variable_name
 		@variable_value = variable_value
@@ -21,11 +21,14 @@ class ASSIGN
 		if !ALL_VARIABLES[@scope].key?(@variable_name)
 			ALL_VARIABLES[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
 			ALL_VARIABLES[@scope][@variable_name]
+		else
+			puts("Trying to initialize a already existant variable!")
+			return nil
 		end	
 	end
 end
 
-class LOOKUP
+class LOOKUP_VAR
 	attr_accessor :variable_name, :starting_scope
 	def initialize(variable_name, starting_scope)     
 		@variable_name = variable_name
@@ -53,14 +56,29 @@ class LOOKUP
 	end
 end
 
+class ASSIGN_FUNC
+	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
+	def initialize (func_name, params, stmt_list, scope)
+		@type = :ASSIGN_FUNC
+		@func_name = variable_name
+		@params = params
+		@block = stmt_list
+		@scope = scope
+	end
+	def val()
+		FUNCTIONS[@scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block,)
+		FUNCTIONS[@scope][@func_name]
+	end	
+end
+
 
 		"""Arithmetics"""
 
 class ADD
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
 		return @value1 + @value2
@@ -70,8 +88,8 @@ end
 class SUBTRACT
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
 		return @value1 - @value2
@@ -81,8 +99,8 @@ end
 class MULTIPLY
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
 		return @value1 * @value2
@@ -92,8 +110,8 @@ end
 class DIVIDE
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP) then b.val() else b end
+		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
+		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
 		return @value1 / @value2
@@ -141,10 +159,7 @@ def FUNCTION_C
 		@block = stmt_list
 	end
 
-	def val(params)
-		if length(params) != length(@params)
-			return nil
-		end
+	def val()
 
 
 	end

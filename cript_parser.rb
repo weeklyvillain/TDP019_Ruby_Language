@@ -82,7 +82,7 @@ class Cript
 
 			rule :ASSIGN do
 				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
-					ASSIGN.new(type + "_C", name, value, 0)
+					ASSIGN_VAR.new(type + "_C", name, value, 0)
 				}
 			end
 
@@ -102,7 +102,8 @@ class Cript
 				match(Float) { |m| m }
 				match(:STR) { |m| m }
 
-				match(:VARIABLE_NAME) { |m| LOOKUP.new(m, 0) }
+				match(:VARIABLE_NAME, /\(/, /.*/, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(var, params.split(','))}
+				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, 0) }
 
 			end
 
@@ -160,9 +161,9 @@ class Cript
 
 	def log(state = false)
 		if state
-			@diceParser.logger.level = Logger::DEBUG
+			@Cript.logger.level = Logger::DEBUG
 		else
-			@diceParser.logger.level = Logger::WARN
+			@Cript.logger.level = Logger::WARN
 		end
 	end
 
@@ -181,12 +182,16 @@ class Cript
 end
 
 if __FILE__ == $0
+	debug = false
 	if ARGV.empty?
-		Cript.new.parser()
+		c = Cript.new
+		c.log(debug)
+		c.parser()
 	else
 		f = ARGV[0]
 		file = File.open(f, "r")
 		parser = Cript.new
+		parser.log(debug)
 		for line in file
 			parser.parser(line)
 		end
