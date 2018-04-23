@@ -1,7 +1,7 @@
 """********** INTEGER **********"""
 class INTEGER_C
 	attr_accessor :value, :type
-	def initialize (value)
+	def initialize(value)
 		@value = value
 		@type = :INT
 	end
@@ -13,7 +13,7 @@ end
 """********** FLOAT **********"""
 class FLOAT_C
 	attr_accessor :value, :type
-	def initialize (value)
+	def initialize(value)
 		@value = value
 		@type = :FLOAT
 	end
@@ -25,7 +25,7 @@ end
 """********** CHAR **********"""
 class CHAR_C
 	attr_accessor :value, :type
-	def initialize (value)
+	def initialize(value)
 		@value = INTEGER_C.new(value.ord)
 		@type = :CHAR
 	end
@@ -34,12 +34,24 @@ class CHAR_C
 	end
 end
 
-"""********** BOOL **********"""
+""" *** BOOL *** """
 class BOOL_C
 	attr_accessor :value,:type
+	def initialize(value)
+		@value = value
+		@type = :BOOL
+	end
+	def val()
+		return @value
+	end
+end
+
+""" *** SUPER *** """
+class SUPER_C
+	attr_accessor :value,:type
 	def initialize (value)
-        @value = value
-        @type = :BOOL
+		@value = value
+		@type = :SUPER
 	end
 	def val()
 		return @value

@@ -9,187 +9,186 @@ require_relative "cript_classes"
 ##############################################################################
 
 class Cript
-  def initialize
-    @Cript = Parser.new("Cript") do
-        
-      """ Spaces and tabs"""
-        token(/[\s\n]+/)
-        token(/\t+/)
+	def initialize
+		@Cript = Parser.new("Cript") do
+			""" *** Spaces and tabs *** """
 
-        """ Separators """
-        token(/^\;/) { |m| m }
+			token(/[\s\n]+/)
+			token(/\t+/)
 
-        """ Variable Typing """
-        token(/Bool/) {|m| m}
-        token(/Float/) {|m| m}
-        token(/\d+\.\d+/) {|m| m.to_f}
+			""" *** Separators *** """
 
-        token(/Integer/) {|m| m}
-        token(/\d+/) {|m| m.to_i}
+			token(/^\;/) { |m| m }
 
-        token(/Char/) {|m| m}
-        token(/String/) {|m| m}
-        
-        #token(/Array/) {|m| m}
+			""" *** Variable Typing *** """
 
-        token(/True/) {|m| m }
-        token(/False/) {|m| m }
+			token(/Bool/) { |m| m }
 
-        #token(/FOR/) {|m| :FOR }
-        #token(/WHILE/) {|m| :WHILE }
+			token(/True/) { |m| m }
+			token(/False/) { |m| m }
 
-        #token(/Console.Log/) {|m| m }
+			token(/Float/) { |m| m }
+			token(/\d+\.\d+/) { |m| m.to_f }
 
-        #token(/Init/) {|m| :FUNCTION }
+			token(/Integer/) { |m| m }
+			token(/\d+/) { |m| m.to_i }
 
-        #token(/>>/){|m|m}
-        #token(/==/) {|m| m }
-      	#token(/!=/) {|m| m }
-      	#token(/>/) {|m| m }
-      	#token(/>=/) {|m| m }
-      	#token(/</) {|m| m }
-      	#token(/<=/) {|m| m }
-      	#token(/&&/) {|m| m }
-        #token(/||/) {|m| m }
-        #token(/!/) {|m| m }
-        token(/\w+/) {|m| m }
-        token(/["'][a-zA-Z\_\,\. ]+["']/){|m| m}
-        token(/./){|m| m.to_s }
+			token(/Char/) { |m| m }
 
+			""" *** Container Typing *** """
 
-      """ *** Start of Statements *** """
-     start :PROGRAM do
-         match(:STMTLIST){|m| m.val() unless m.class == nil }
-     end
+			token(/String/) { |m| m }
+			token(/Array/) { |m| m }
 
-      rule :STMTLIST do
-          match(:STMT, :STMTLIST){}
-          match(:STMT)
-      end
+			""" *** Keywords *** """
 
-    rule :STMT do
+			token(/If/) { |m| m }
+			#token(/For/) {|m| :FOR }
+			#token(/While/) {|m| :WHILE }
 
-      match(:ASSIGN){|m| m}
-      match(:EXPR){|m| m}
-    end
+			#token(/Console.Log/) {|m| m }
 
-      rule :ASSIGN do
+			token(/Init/) {|m| m }
 
-        match(:VARIABLE_TYPE, :VARIABLE_NAME, '=', :EXPR, ';'){|type, name, _, value, _|
-          ASSIGN.new(type + "_C", name, value, 0)
-        } 
+			#token(/>>/){|m|m}
+			#token(/==/) {|m| m }
+			#token(/!=/) {|m| m }
+			#token(/>/) {|m| m }
+			#token(/>=/) {|m| m }
+			#token(/</) {|m| m }
+			#token(/<=/) {|m| m }
+			#token(/&&/) {|m| m }
+			#token(/||/) {|m| m }
+			#token(/!/) {|m| m }
+			token(/\w+/) { |m| m }
+			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
+			token(/./) { |m| m.to_s }
 
-     end
+			""" *** Start of Statements *** """
+			start :PROGRAM do
+				match(:STMTLIST) { |m| m.val() unless m.class == nil }
+			end
 
-       rule :EXPR do
-        match(:EXPR, '+', :TERM){ |a, _, b| ADD.new(a,b) }
-        match(:EXPR, '-', :TERM){ |a, _, b| SUBTRACT.new(a,b)}
-        match(:TERM)
-      end
+			rule :STMTLIST do
+				match(:STMT, :STMTLIST) { }
+				match(:STMT)
+			end
 
-      rule :TERM do
-        match('True'){ true }
-        match('False'){ false }
-        match(:TERM, '*', :TERM){ |a, _, b| MULTIPLY.new(a, b) }
-        match(:TERM, '/', :TERM){ |a, _, b| DIVIDE.new(a, b) }
-        match(Integer){ |m| m }
-        match(Float){ |m| m }
-        match(:STR){ |m| m }
-        match(:VARIABLE_NAME){|m| LOOKUP.new(m, 0)}
-      end
+			rule :STMT do
+				match(:ASSIGN) { |m| m }
+				match(:FUNCDEF){ |m| m }
+				match(:EXPR, /;?/) { |m, _| m }
+			end
 
+			rule :ASSIGN do
+				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
+					ASSIGN.new(type + "_C", name, value, 0)
+				}
+			end
 
-      rule :VARIABLE_TYPE do
-        match(/Bool/){|m| m.upcase }
-        match(/Integer/){|m| m.upcase }
-        match(/Float/){|m| m.upcase }
-        match(/Char/){|m| m.upcase }
-        match(/String/){|m| m.upcase }
-      end 
-      rule :VARIABLE_NAME do
-        match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/){|m| m}
-      end
+			rule :EXPR do
+				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
+				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
+				match(:TERM)
+				
+			end
 
-      rule :STR do 
-        match(/["'][a-zA-Z\_\,\. ]+["']/){|m| m[1..-2]}
-        match(/["']/, /["']/){""}
-      end
-    #  rule :TERM do
-    #      # :INT
-    #       #:CHAR
-    #      # :BOOL
-    #       #:CLASS
-    #       #:SUPER
-    #       #:VARIABLE
-    #   end
+			rule :TERM do
+				match("True") { true }
+				match("False") { false }
+				match(:TERM, "*", :TERM) { |a, _, b| MULTIPLY.new(a, b) }
+				match(:TERM, "/", :TERM) { |a, _, b| DIVIDE.new(a, b) }
+				match(Integer) { |m| m }
+				match(Float) { |m| m }
+				match(:STR) { |m| m }
 
+				match(:VARIABLE_NAME) { |m| LOOKUP.new(m, 0) }
 
-      #:STMT{
-    #      :FUNCTION
-    #      :STD_FUNCTION
-     # }
+			end
 
-    end
-  end
+			rule :VARIABLE_TYPE do
+				match(/Bool/) { |m| m.upcase }
+				match(/Integer/) { |m| m.upcase }
+				match(/Float/) { |m| m.upcase }
+				match(/Char/) { |m| m.upcase }
+				match(/String/) { |m| m.upcase }
+			end
 
-  def done(str)
-    ["quit","exit","bye",""].include?(str.chomp)
-  end
+			rule :VARIABLE_NAME do
+				match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/) { |m| m }
+			end
 
-  def run(str = "")
-    print_variable_table()
+			rule :STR do
+				match(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m[1..-2] }
+				match(/["']/, /["']/) { "" }
+			end
 
-    print "[Cript++]~ "
-    if str.length == 0
-      str = gets
-    else
-      if done(str) then
-        puts "Bye."
-      else
-        puts "=> #{@Cript.parse str}"
-       return
-      end
-    end
-    
-    if done(str) then
-      puts "Bye."
-    else
-      puts "=> #{@Cript.parse str}"
-     run
-    end
-  end
+			rule :FUNCDEF do
+				match(/Init/, :VARIABLE_NAME, /\(/, /([a-zA-Z]+,)+/, /\)/, /\{\n/, :STMTLIST, /\};/){
+					|_, name, _, params, _, _, stmt_list, _| 
+					FUNCTION_C.new(name, params.split(','), stmt_list)
+				}
+			end
+		end
+	end
 
-  def log(state = false)
-    if state
-      @diceParser.logger.level = Logger::DEBUG
-    else
-      @diceParser.logger.level = Logger::WARN
-    end
-  end
+	def done(str)
+		["quit", "exit", "bye", ""].include?(str.chomp)
+	end
 
-  def print_variable_table(state = true) 
-    if state 
-      ALL_VARIABLES.each_with_index { |scope_variables, scope|
-      puts "\nScope: " + scope.to_s
-      for x in 0 .. scope_variables.length-1 do    
-        print "\nVariable Name: " + scope_variables.keys[x].to_s + "{"
-        print "\n   Value: "+scope_variables[scope_variables.keys[x]].val.to_s + ","
-        print "\n   Datatype: " + scope_variables[scope_variables.keys[x]].type.to_s + "\n}\n\n"
-      end
-    }
-    end
-  end 
+	def parser(str = "")
+		print_variable_table()
+		print "[Cript++]~ "
+		if str.length == 0
+			str = gets
+		else
+			if done(str)
+				puts "Bye."
+			else
+				puts "=> #{@Cript.parse str}"
+				return
+			end
+		end
+
+		if done(str)
+			puts "Bye."
+		else
+			puts "=> #{@Cript.parse str}"
+			parser
+		end
+	end
+
+	def log(state = false)
+		if state
+			@diceParser.logger.level = Logger::DEBUG
+		else
+			@diceParser.logger.level = Logger::WARN
+		end
+	end
+
+	def print_variable_table(state = true)
+		if state
+			ALL_VARIABLES.each_with_index { |scope_variables, scope|
+				puts "\nScope: " + scope.to_s
+				for x in 0..scope_variables.length - 1
+					print "\nVariable Name: " + scope_variables.keys[x].to_s + "{"
+					print "\n   Value: " + scope_variables[scope_variables.keys[x]].val.to_s + ","
+					print "\n   Datatype: " + scope_variables[scope_variables.keys[x]].type.to_s + "\n}\n\n"
+				end
+			}
+		end
+	end
 end
 
 if __FILE__ == $0
-  if ARGV.empty?
-    Cript.new.run()
-  else
-    f = ARGV[0]
-    file = File.open(f, "r")
-    parser = Cript.new
-    for line in file
-      parser.run(line)
-    end
-  end
+	if ARGV.empty?
+		Cript.new.parser()
+	else
+		f = ARGV[0]
+		file = File.open(f, "r")
+		parser = Cript.new
+		for line in file
+			parser.parser(line)
+		end
+	end
 end

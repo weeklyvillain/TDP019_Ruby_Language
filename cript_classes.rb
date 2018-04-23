@@ -1,10 +1,13 @@
 require_relative "cript_archetypes"
 
 ALL_VARIABLES = [{}]
+FUNCTIONS = [{}]
 
-        """ Variable Handling """
 
-"""********** ASSIGN **********"""
+		""" Variable Handling """
+
+""" *** ASSIGN and LOOKUP *** """
+
 class ASSIGN
 	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
 	def initialize (variable_type, variable_name, variable_value, scope)
@@ -23,11 +26,11 @@ class ASSIGN
 end
 
 class LOOKUP
-    attr_accessor :variable_name, :starting_scope
-    def initialize(variable_name, starting_scope)     
-        @variable_name = variable_name
-        @starting_scope = starting_scope;
-    end
+	attr_accessor :variable_name, :starting_scope
+	def initialize(variable_name, starting_scope)     
+		@variable_name = variable_name
+		@starting_scope = starting_scope;
+	end
 	def val(scope = @starting_scope)
 		if ALL_VARIABLES[scope].key?(@variable_name)
 			previous = ALL_VARIABLES[scope][@variable_name]
@@ -38,16 +41,16 @@ class LOOKUP
 					return previous.val()
 				end
 			end
-            
-        else
-            if scope-1 >= 0
-                self.val(scope-1)
-            else
+			
+		else
+			if scope-1 >= 0
+				self.val(scope-1)
+			else
 				puts("Variable does not exit!")
 				return nil
-            end
-        end
-    end
+			end
+		end
+	end
 end
 
 
@@ -63,6 +66,7 @@ class ADD
 		return @value1 + @value2
 	end
 end
+
 class SUBTRACT
 	attr_accessor :value
 	def initialize(a, b)
@@ -73,6 +77,7 @@ class SUBTRACT
 		return @value1 - @value2
 	end
 end
+
 class MULTIPLY
 	attr_accessor :value
 	def initialize(a, b)
@@ -83,6 +88,7 @@ class MULTIPLY
 		return @value1 * @value2
 	end
 end
+
 class DIVIDE
 	attr_accessor :value
 	def initialize(a, b)
@@ -95,14 +101,14 @@ class DIVIDE
 end
 
 
-        """ Containers """
+		""" Containers """
 
-"""********** STRING **********"""
+""" *** STRING *** """
 class STRING_C
 	attr_accessor :value, :type
-	def initialize (value)
-        @value = Array.new()
-        value.split('').each {|c| @value << CHAR_C.new(c)}
+	def initialize(value)
+		@value = Array.new()
+		value.split('').each {|c| @value << CHAR_C.new(c)}
 		@type = :STRING
 	end
 	def val()
@@ -113,11 +119,33 @@ end
 #"""********** ARRAY **********"""
 #class ARRAY
 #	attr_accessor :value, :type
-#	def initialize (value)
+#	def initialize(value)
 #		@value = Array.new(value.split('').each {|c| CHAR.new(c)})
 #		@type = :STRING
 #	end
-#	def val()
+#	def val(key)
 #		return @value.each{|c| c.val()}.join('')
 #	end
 #end
+
+
+""" *** COMPARISONS *** """
+
+
+""" *** FUNCTIONS *** """
+
+def FUNCTION_C
+	def initialize(name, params, stmt_list)
+		@self = name
+		@params = params
+		@block = stmt_list
+	end
+
+	def val(params)
+		if length(params) != length(@params)
+			return nil
+		end
+
+
+	end
+end
