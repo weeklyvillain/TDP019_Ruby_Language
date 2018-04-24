@@ -48,7 +48,7 @@ class Cript
 
 			#token(/Console.Log/) {|m| m }
 
-			token(/Init/) {|m| m }
+			token(/Init/) { |m| m }
 
 			#token(/>>/){|m|m}
 			#token(/==/) {|m| m }
@@ -75,9 +75,11 @@ class Cript
 			end
 
 			rule :STMT do
-				match(:ASSIGN) { |m| m }
 				match(:FUNCDEF){ |m| m }
+				match(:ASSIGN) { |m| m }
+
 				match(:EXPR, /;?/) { |m, _| m }
+
 			end
 
 			rule :ASSIGN do
@@ -90,7 +92,8 @@ class Cript
 				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
 				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
 				match(:TERM)
-				
+
+
 			end
 
 			rule :TERM do
@@ -102,8 +105,10 @@ class Cript
 				match(Float) { |m| m }
 				match(:STR) { |m| m }
 
-				match(:VARIABLE_NAME, /\(/, /.*/, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(var, params.split(','))}
+				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, 0) }
+
+
 
 			end
 
@@ -124,11 +129,22 @@ class Cript
 				match(/["']/, /["']/) { "" }
 			end
 
+			rule :ARGUMENT_LIST do
+        match(:STMT){|m| [m] }
+        match(:ARGUMENT_LIST,',',:STMT){|m,_,n| [m]<<[n] }
+      end
+
+			rule :FUNC_CALL do
+					match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, 0)}
+			end
 			rule :FUNCDEF do
-				match(/Init/, :VARIABLE_NAME, /\(/, /([a-zA-Z]+,)+/, /\)/, /\{\n/, :STMTLIST, /\};/){
-					|_, name, _, params, _, _, stmt_list, _| 
-					FUNCTION_C.new(name, params.split(','), stmt_list)
+				match(/Init/, :VARIABLE_NAME, /\(/, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, _, _, stmt_list, _|
+					ASSIGN_FUNC.new(name, nil, stmt_list)
 				}
+				#match(:INIT, :VARIABLE_NAME, /\(/, /[a-zA-Z]+/, /\)/, /\{/, :EXPR, /\};/){
+				#	|_, name, _, params, _, _, stmt_list, _|
+				#	FUNCTION_C.new(name, params.split(','), stmt_list)
+				#}
 			end
 		end
 	end
@@ -139,6 +155,7 @@ class Cript
 
 	def parser(str = "")
 		print_variable_table()
+		print_func_table()
 		print "[Cript++]~ "
 		if str.length == 0
 			str = gets
@@ -172,17 +189,31 @@ class Cript
 			ALL_VARIABLES.each_with_index { |scope_variables, scope|
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_variables.length - 1
-					print "\nVariable Name: " + scope_variables.keys[x].to_s + "{"
+					print "\nVariable Name: " + scope_variables.keys[x].to_s + " {"
 					print "\n   Value: " + scope_variables[scope_variables.keys[x]].val.to_s + ","
 					print "\n   Datatype: " + scope_variables[scope_variables.keys[x]].type.to_s + "\n}\n\n"
 				end
 			}
 		end
 	end
+
+	def print_func_table(state = true)
+		if state
+			FUNCTIONS.each_with_index { |scope_funs, scope|
+				puts "\nScope: " + scope.to_s
+				for x in 0..scope_funs.length - 1
+					print "\nFunction Name: " + scope_funs.keys[x].to_s + " {"
+					print "\n   block: " + scope_funs[scope_funs.keys[x]].val.to_s + "\n}\n\n"
+				end
+			}
+		end
+	end
 end
 
+
+
 if __FILE__ == $0
-	debug = false
+	debug = true
 	if ARGV.empty?
 		c = Cript.new
 		c.log(debug)
