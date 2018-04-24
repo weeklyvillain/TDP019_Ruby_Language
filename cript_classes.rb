@@ -24,13 +24,13 @@ class ASSIGN_VAR
 		else
 			puts("Trying to initialize a already existant variable!")
 			return nil
-		end	
+		end
 	end
 end
 
 class LOOKUP_VAR
 	attr_accessor :variable_name, :starting_scope
-	def initialize(variable_name, starting_scope)     
+	def initialize(variable_name, starting_scope)
 		@variable_name = variable_name
 		@starting_scope = starting_scope;
 	end
@@ -44,7 +44,7 @@ class LOOKUP_VAR
 					return previous.val()
 				end
 			end
-			
+
 		else
 			if scope-1 >= 0
 				self.val(scope-1)
@@ -57,19 +57,38 @@ class LOOKUP_VAR
 end
 
 class ASSIGN_FUNC
-	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
-	def initialize (func_name, params, stmt_list, scope)
+	attr_accessor :type, :func_name, :params, :block, :scope
+	def initialize (func_name, params, stmt_list)
 		@type = :ASSIGN_FUNC
-		@func_name = variable_name
+		@func_name = func_name
 		@params = params
 		@block = stmt_list
-		@scope = scope
+		@scope = 0
 	end
 	def val()
-		FUNCTIONS[@scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block,)
+		FUNCTIONS[@scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block)
 		FUNCTIONS[@scope][@func_name]
-	end	
+	end
 end
+
+class LOOKUP_FUNC
+	attr_accessor :func_name, :starting_scope
+	def initialize(func_name, starting_scope)
+		@func_name = func_name
+		@starting_scope = starting_scope;
+	end
+	def val(scope = @starting_scope)
+		if FUNCTIONS[scope].key?(@func_name)
+			puts(FUNCTIONS[scope][@func_name].val)
+			FUNCTIONS[scope][@func_name].val
+
+		else
+				puts("Function does not exit!")
+				return nil
+			end
+		end
+	end
+
 
 
 		"""Arithmetics"""
@@ -135,16 +154,16 @@ class STRING_C
 end
 
 #"""********** ARRAY **********"""
-#class ARRAY
-#	attr_accessor :value, :type
-#	def initialize(value)
-#		@value = Array.new(value.split('').each {|c| CHAR.new(c)})
-#		@type = :STRING
-#	end
-#	def val(key)
-#		return @value.each{|c| c.val()}.join('')
-#	end
-#end
+class ARRAY
+	attr_accessor :value, :type
+	def initialize(value)
+		@value = Array.new(value.split('').each {|c| CHAR.new(c)})
+		@type = :STRING
+	end
+	def val(key)
+		return @value.each{|c| c.val()}.join('')
+	end
+end
 
 
 """ *** COMPARISONS *** """
@@ -152,7 +171,8 @@ end
 
 """ *** FUNCTIONS *** """
 
-def FUNCTION_C
+class FUNCTION_C
+	attr_accessor :value, :block
 	def initialize(name, params, stmt_list)
 		@self = name
 		@params = params
@@ -160,7 +180,7 @@ def FUNCTION_C
 	end
 
 	def val()
-
+		@block.val()
 
 	end
 end
