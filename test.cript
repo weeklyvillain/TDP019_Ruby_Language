@@ -3,5 +3,7 @@ Integer b = 50;
 Integer c = a - b;
 c;
 String hej = 'Hello World';
-hej;    
+hej;
+Init fun(){a+b;}
+fun();
 exit
