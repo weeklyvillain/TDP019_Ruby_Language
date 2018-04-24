@@ -4,6 +4,6 @@ Integer c = a - b;
 c;
 String hej = 'Hello World';
 hej;
-Init fun(){a+b;}
+Init fun(Integer foo, String bar){a+b;}
 fun();
 exit

@@ -64,27 +64,32 @@ class ASSIGN_FUNC
 		@params = params
 		@block = stmt_list
 		@scope = 0
+		@inside_scope = ALL_VARIABLES.insert({})
 	end
 	def val()
-		FUNCTIONS[@scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block)
+		FUNCTIONS[@scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block, @inside_scope)
 		FUNCTIONS[@scope][@func_name]
 	end
 end
 
 class LOOKUP_FUNC
 	attr_accessor :func_name, :starting_scope
-	def initialize(func_name, starting_scope)
+	def initialize(func_name, starting_scope, params)
 		@func_name = func_name
-		@starting_scope = starting_scope;
+		@starting_scope = starting_scope
+		@params = params
 	end
 	def val(scope = @starting_scope)
 		if FUNCTIONS[scope].key?(@func_name)
-			puts(FUNCTIONS[scope][@func_name].val)
-			FUNCTIONS[scope][@func_name].val
-
+			if @params != nil			
+				@params.each {|key, value| 
+					FUNCTIONS[scope][@func_name].scope[key] = SUPER_C.new(value)
+				}
+			end
+			FUNCTIONS[scope][@func_name].val()
 		else
-				puts("Function does not exit!")
-				return nil
+			puts("Function does not exit!")
+			return nil
 			end
 		end
 	end
@@ -168,19 +173,3 @@ end
 
 """ *** COMPARISONS *** """
 
-
-""" *** FUNCTIONS *** """
-
-class FUNCTION_C
-	attr_accessor :value, :block
-	def initialize(name, params, stmt_list)
-		@self = name
-		@params = params
-		@block = stmt_list
-	end
-
-	def val()
-		@block.val()
-
-	end
-end

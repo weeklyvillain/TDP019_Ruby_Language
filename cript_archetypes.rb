@@ -57,3 +57,19 @@ class SUPER_C
 		return @value
 	end
 end
+
+""" *** FUNCTIONS *** """
+
+class FUNCTION_C
+	attr_accessor :value, :block, :params
+	def initialize(name, params, stmt_list, scope_array)
+		@self = name
+		@params = params
+		@block = stmt_list
+		@scope = scope_array
+	end
+
+	def val()
+		@block.val()
+	end
+end

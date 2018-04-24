@@ -70,7 +70,7 @@ class Cript
 			end
 
 			rule :STMTLIST do
-				match(:STMT, :STMTLIST) { }
+				match(:STMT, :STMTLIST)
 				match(:STMT)
 			end
 
@@ -129,22 +129,37 @@ class Cript
 				match(/["']/, /["']/) { "" }
 			end
 
-			rule :ARGUMENT_LIST do
-        match(:STMT){|m| [m] }
-        match(:ARGUMENT_LIST,',',:STMT){|m,_,n| [m]<<[n] }
-      end
+			rule :PARAM_LIST do
 
-			rule :FUNC_CALL do
-					match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, 0)}
+				match(:VARIABLE_TYPE, :VARIABLE_NAME, ',', :PARAM_LIST){ |type, name, _, n| [n]<<[name, type] }
+				match(:VARIABLE_TYPE, :VARIABLE_NAME){ |type, name| [name, type] }
+				match(""){nil}
 			end
+			
+			rule :ARGUMENT_LIST do
+				match(:EXPR, ',', :ARGUMENT_LIST){ |m, _, n| [n]<<[m] }
+				match(:EXPR){ |m| [m] }
+				match(""){nil}
+	  		end
+
+
 			rule :FUNCDEF do
+				match(/Init/, :VARIABLE_NAME, /\(/, :PARAM_LIST, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, params, _, _, stmt_list, _|
+					ASSIGN_FUNC.new(name, params, stmt_list)
+				}
 				match(/Init/, :VARIABLE_NAME, /\(/, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, _, _, stmt_list, _|
 					ASSIGN_FUNC.new(name, nil, stmt_list)
 				}
+				
 				#match(:INIT, :VARIABLE_NAME, /\(/, /[a-zA-Z]+/, /\)/, /\{/, :EXPR, /\};/){
 				#	|_, name, _, params, _, _, stmt_list, _|
 				#	FUNCTION_C.new(name, params.split(','), stmt_list)
 				#}
+			end
+
+			rule :FUNC_CALL do
+				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, _, params, _| LOOKUP_FUNC.new(name, 0, params) }
+				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, 0, nil) }
 			end
 		end
 	end
@@ -203,7 +218,8 @@ class Cript
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_funs.length - 1
 					print "\nFunction Name: " + scope_funs.keys[x].to_s + " {"
-					print "\n   block: " + scope_funs[scope_funs.keys[x]].val.to_s + "\n}\n\n"
+					print "\n   Block: " + scope_funs[scope_funs.keys[x]].val.to_s + ","
+					print "\n	Params: " + scope_funs[scope_funs.keys[x]].params.to_s + "\n}\n\n"
 				end
 			}
 		end
