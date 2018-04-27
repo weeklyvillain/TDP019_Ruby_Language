@@ -70,6 +70,6 @@ class FUNCTION_C
 	end
 
 	def val(params)
-		@block.val(params)
+		@block.val()
 	end
 end

@@ -170,7 +170,7 @@ class Cript
 
 	def parser(str = "")
 		print_variable_table()
-		print_func_table()
+		#print_func_table()
 		print "[Cript++]~ "
 		if str.length == 0
 			str = gets
