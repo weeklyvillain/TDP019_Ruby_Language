@@ -158,7 +158,7 @@ class Cript
 			end
 
 			rule :FUNC_CALL do
-				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, _, params, _| LOOKUP_FUNC.new(name, 0, params) }
+				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, 0, params) }
 				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, 0, nil) }
 			end
 		end

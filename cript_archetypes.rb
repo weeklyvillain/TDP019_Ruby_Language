@@ -61,7 +61,7 @@ end
 """ *** FUNCTIONS *** """
 
 class FUNCTION_C
-	attr_accessor :value, :block, :params
+	attr_accessor :value, :block, :params, :scope
 	def initialize(name, params, stmt_list, scope_array)
 		@self = name
 		@params = params
@@ -69,7 +69,7 @@ class FUNCTION_C
 		@scope = scope_array
 	end
 
-	def val()
-		@block.val()
+	def val(params)
+		@block.val(params)
 	end
 end

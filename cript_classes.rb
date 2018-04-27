@@ -81,12 +81,7 @@ class LOOKUP_FUNC
 	end
 	def val(scope = @starting_scope)
 		if FUNCTIONS[scope].key?(@func_name)
-			if @params != nil			
-				@params.each {|key, value| 
-					FUNCTIONS[scope][@func_name].scope[key] = SUPER_C.new(value)
-				}
-			end
-			FUNCTIONS[scope][@func_name].val()
+			FUNCTIONS[scope][@func_name].val(@params)
 		else
 			puts("Function does not exit!")
 			return nil
