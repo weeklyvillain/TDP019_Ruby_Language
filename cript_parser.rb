@@ -61,7 +61,9 @@ class Cript
 			#token(/||/) {|m| m }
 			#token(/!/) {|m| m }
 			token(/\w+/) { |m| m }
+			token(/\{\n.*\n\}/s){ |m| m }
 			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
+
 			token(/./) { |m| m.to_s }
 
 			""" *** Start of Statements *** """
@@ -84,7 +86,7 @@ class Cript
 
 			rule :ASSIGN do
 				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
-					ASSIGN_VAR.new(type + "_C", name, value, 0)
+					ASSIGN_VAR.new(type + "_C", name, value, @@current_scope)
 				}
 			end
 
@@ -106,7 +108,7 @@ class Cript
 				match(:STR) { |m| m }
 
 				match(:FUNC_CALL) {|m| m}
-				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, 0) }
+				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, @@current_scope) }
 
 
 
@@ -137,8 +139,8 @@ class Cript
 			end
 			
 			rule :ARGUMENT_LIST do
-				match(:EXPR, ',', :ARGUMENT_LIST){ |m, _, n| [n]<<[m] }
-				match(:EXPR){ |m| [m] }
+				match(:EXPR, ',', :ARGUMENT_LIST){ |m, _, n| [n] << m }
+				match(:EXPR){ |m| m }
 				match(""){nil}
 	  		end
 
@@ -158,8 +160,8 @@ class Cript
 			end
 
 			rule :FUNC_CALL do
-				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, 0, params) }
-				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, 0, nil) }
+				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, @@current_scope, params) }
+				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, @@current_scope, nil) }
 			end
 		end
 	end
@@ -170,7 +172,7 @@ class Cript
 
 	def parser(str = "")
 		print_variable_table()
-		#print_func_table()
+		print_func_table()
 		print "[Cript++]~ "
 		if str.length == 0
 			str = gets
@@ -201,7 +203,7 @@ class Cript
 
 	def print_variable_table(state = true)
 		if state
-			ALL_VARIABLES.each_with_index { |scope_variables, scope|
+			@@all_variables.each_with_index { |scope_variables, scope|
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_variables.length - 1
 					print "\nVariable Name: " + scope_variables.keys[x].to_s + " {"
@@ -214,7 +216,7 @@ class Cript
 
 	def print_func_table(state = true)
 		if state
-			FUNCTIONS.each_with_index { |scope_funs, scope|
+			@@functions.each_with_index { |scope_funs, scope|
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_funs.length - 1
 					print "\nFunction Name: " + scope_funs.keys[x].to_s + " {"

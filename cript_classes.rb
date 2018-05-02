@@ -1,7 +1,9 @@
 require_relative "cript_archetypes"
 
-ALL_VARIABLES = [{}]
-FUNCTIONS = [{}]
+@@all_variables = [{}]
+@@functions = [{}]
+@@current_scope = 0
+@@base_scope = 0
 
 
 		""" Variable Handling """
@@ -18,9 +20,9 @@ class ASSIGN_VAR
 		@scope = scope
 	end
 	def val()
-		if !ALL_VARIABLES[@scope].key?(@variable_name)
-			ALL_VARIABLES[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
-			ALL_VARIABLES[@scope][@variable_name]
+		if !@@all_variables[@scope].key?(@variable_name)
+			@@all_variables[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
+			@@all_variables[@scope][@variable_name]
 		else
 			puts("Trying to initialize a already existant variable!")
 			return nil
@@ -35,16 +37,15 @@ class LOOKUP_VAR
 		@starting_scope = starting_scope;
 	end
 	def val(scope = @starting_scope)
-		if ALL_VARIABLES[scope].key?(@variable_name)
-			previous = ALL_VARIABLES[scope][@variable_name]
+		if @@all_variables[scope].key?(@variable_name)
+			previous = @@all_variables[scope][@variable_name]
 			while true do
 				if previous.val().respond_to?(:val)
 					previous = previous.val()
 				else
-					return previous.val()
+					return previous
 				end
 			end
-
 		else
 			if scope-1 >= 0
 				self.val(scope-1)
@@ -63,12 +64,10 @@ class ASSIGN_FUNC
 		@func_name = func_name
 		@params = params
 		@block = stmt_list
-		@scope = 0
-		@inside_scope = ALL_VARIABLES.insert({})
 	end
 	def val()
-		FUNCTIONS[@scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block, @inside_scope)
-		FUNCTIONS[@scope][@func_name]
+		@@functions[@@current_scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block)
+		@@functions[@@current_scope][@func_name]
 	end
 end
 
@@ -80,8 +79,8 @@ class LOOKUP_FUNC
 		@params = params
 	end
 	def val(scope = @starting_scope)
-		if FUNCTIONS[scope].key?(@func_name)
-			FUNCTIONS[scope][@func_name].val(@params)
+		if @@functions[scope].key?(@func_name)
+			@@functions[scope][@func_name].val(@params)
 		else
 			puts("Function does not exit!")
 			return nil
@@ -100,7 +99,15 @@ class ADD
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
-		return @value1 + @value2
+		if @value1 != nil and @value2 != nil
+			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
+				return FLOAT_C.new(@value1.val() + @value2.val())
+			else
+				return INTEGER_C.new(@value1.val() + @value2.val())
+			end
+		else
+			return nil
+		end
 	end
 end
 
@@ -110,8 +117,19 @@ class SUBTRACT
 		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
+	def to_s()
+		self.val()
+	end
 	def val()
-		return @value1 - @value2
+		if @value1 != nil and @value2 != nil
+			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
+				return FLOAT_C.new(@value1.val() - @value2.val())
+			else
+				return INTEGER_C.new(@value1.val() - @value2.val())
+			end
+		else
+			return nil
+		end
 	end
 end
 
@@ -122,7 +140,15 @@ class MULTIPLY
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
-		return @value1 * @value2
+		if @value1 != nil and @value2 != nil
+			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
+				return FLOAT_C.new(@value1.val() * @value2.val())
+			else
+				return INTEGER_C.new(@value1.val() * @value2.val())
+			end
+		else
+			return nil
+		end
 	end
 end
 
@@ -133,7 +159,11 @@ class DIVIDE
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def val()
-		return @value1 / @value2
+		if @value1 != nil and @value2 != nil
+			return FLOAT_C.new(@value1.val() / @value2.val())
+		else
+			return nil
+		end
 	end
 end
 
@@ -148,12 +178,15 @@ class STRING_C
 		value.split('').each {|c| @value << CHAR_C.new(c)}
 		@type = :STRING
 	end
+	def to_s()
+		self.val()
+	end
 	def val()
 		return @value.map{|c| c.val()}.join('')
 	end
 end
 
-#"""********** ARRAY **********"""
+""" *** ARRAY *** """
 class ARRAY
 	attr_accessor :value, :type
 	def initialize(value)

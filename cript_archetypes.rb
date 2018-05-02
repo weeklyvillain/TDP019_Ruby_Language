@@ -5,6 +5,10 @@ class INTEGER_C
 		@value = value
 		@type = :INT
 	end
+	def to_s()
+		self.val()
+	end
+
 	def val()
 		return @value
 	end
@@ -61,15 +65,34 @@ end
 """ *** FUNCTIONS *** """
 
 class FUNCTION_C
-	attr_accessor :value, :block, :params, :scope
-	def initialize(name, params, stmt_list, scope_array)
+	attr_accessor :value, :block, :params
+	def initialize(name, params, stmt_list)
 		@self = name
 		@params = params
 		@block = stmt_list
-		@scope = scope_array
 	end
 
-	def val(params)
-		@block.val()
+	def val(params = nil)
+		@@all_variables.push({})
+		@@current_scope += 1
+#		if params != nil
+			# (0..@params.length).each{ |i| 
+			# 	begin 
+			# 		if params[i].respond_to?(:val)
+			# 			params[i] = params[i].val
+					
+			# 		@@all_variables[@@current_scope][@params[i]['name']] = Object.const_get(@params[i]['type']).new(params[i]) 
+			# 	rescue
+			# 		if @params[i].is_a? DefaultParam do
+			# 			# assigna värdet från defa
+			# 		else
+			# 			reraise
+			# 		end
+			# 	end
+			
+		r = @block.val()
+		@@all_variables.pop()
+		@@current_scope -= 1
+		r
 	end
 end
