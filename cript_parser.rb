@@ -35,6 +35,8 @@ class Cript
 
 			token(/Char/) { |m| m }
 
+			token(/Init/) { |m| m }
+
 			""" *** Container Typing *** """
 
 			token(/String/) { |m| m }
@@ -43,13 +45,26 @@ class Cript
 			""" *** Keywords *** """
 
 			token(/If/) { |m| m }
+			
+			token(/Not/) { |m| m }
+			token(/\!/) {|m| m }
+			
+			token(/AND/) { |m| m }
+			token(/\&\&/) {|m| m }
+			
+			token(/Or/) { |m| m }
+			token(/\|\|/) {|m| m }
+
+
 			#token(/For/) {|m| :FOR }
 			#token(/While/) {|m| :WHILE }
 
 			#token(/Console.Log/) {|m| m }
 
-			token(/Init/) { |m| m }
 
+
+
+			""" *** Operators *** """
 			#token(/>>/){|m|m}
 			#token(/==/) {|m| m }
 			#token(/!=/) {|m| m }
@@ -57,9 +72,9 @@ class Cript
 			#token(/>=/) {|m| m }
 			#token(/</) {|m| m }
 			#token(/<=/) {|m| m }
-			#token(/&&/) {|m| m }
-			#token(/||/) {|m| m }
-			#token(/!/) {|m| m }
+			
+			
+			
 			token(/\w+/) { |m| m }
 			token(/\{\n.*\n\}/s){ |m| m }
 			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
@@ -79,9 +94,24 @@ class Cript
 			rule :STMT do
 				match(:FUNCDEF){ |m| m }
 				match(:ASSIGN) { |m| m }
+				match(:IFSTMT)
+				match(:LOOP)
 
 				match(:EXPR, /;?/) { |m, _| m }
 
+			end
+
+			rule :VARIABLE_NAME do
+				match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/) { |m| m }
+			end
+
+			rule :FUNCDEF do
+				match(/Init/, :VARIABLE_NAME, /\(/, :PARAM_LIST, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, params, _, _, stmt_list, _|
+					ASSIGN_FUNC.new(name, params, stmt_list)
+				}
+				match(/Init/, :VARIABLE_NAME, /\(/, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, _, _, stmt_list, _|
+					ASSIGN_FUNC.new(name, nil, stmt_list)
+				}
 			end
 
 			rule :ASSIGN do
@@ -94,10 +124,12 @@ class Cript
 				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
 				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
 				match(:TERM)
-
-
 			end
 
+			rule :IFSTMT do
+				match("If", :EXPR, :OPERATOR, :EXPR){ |_, a, op, b| IF.new(a, b, op) }
+			end
+			
 			rule :TERM do
 				match("True") { true }
 				match("False") { false }
@@ -109,9 +141,6 @@ class Cript
 
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, @@current_scope) }
-
-
-
 			end
 
 			rule :VARIABLE_TYPE do
@@ -122,17 +151,17 @@ class Cript
 				match(/String/) { |m| m.upcase }
 			end
 
-			rule :VARIABLE_NAME do
-				match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/) { |m| m }
-			end
-
 			rule :STR do
 				match(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m[1..-2] }
 				match(/["']/, /["']/) { "" }
 			end
 
-			rule :PARAM_LIST do
+			rule :FUNC_CALL do
+				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, @@current_scope, params) }
+				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, @@current_scope, nil) }
+			end
 
+			rule :PARAM_LIST do
 				match(:VARIABLE_TYPE, :VARIABLE_NAME, ',', :PARAM_LIST){ |type, name, _, n| [n]<<[name, type] }
 				match(:VARIABLE_TYPE, :VARIABLE_NAME){ |type, name| [name, type] }
 				match(""){nil}
@@ -143,26 +172,6 @@ class Cript
 				match(:EXPR){ |m| m }
 				match(""){nil}
 	  		end
-
-
-			rule :FUNCDEF do
-				match(/Init/, :VARIABLE_NAME, /\(/, :PARAM_LIST, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, params, _, _, stmt_list, _|
-					ASSIGN_FUNC.new(name, params, stmt_list)
-				}
-				match(/Init/, :VARIABLE_NAME, /\(/, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, _, _, stmt_list, _|
-					ASSIGN_FUNC.new(name, nil, stmt_list)
-				}
-				
-				#match(:INIT, :VARIABLE_NAME, /\(/, /[a-zA-Z]+/, /\)/, /\{/, :EXPR, /\};/){
-				#	|_, name, _, params, _, _, stmt_list, _|
-				#	FUNCTION_C.new(name, params.split(','), stmt_list)
-				#}
-			end
-
-			rule :FUNC_CALL do
-				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, @@current_scope, params) }
-				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, @@current_scope, nil) }
-			end
 		end
 	end
 
@@ -184,13 +193,6 @@ class Cript
 				return
 			end
 		end
-
-		if done(str)
-			puts "Bye."
-		else
-			puts "=> #{@Cript.parse str}"
-			parser
-		end
 	end
 
 	def log(state = false)
@@ -207,7 +209,7 @@ class Cript
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_variables.length - 1
 					print "\nVariable Name: " + scope_variables.keys[x].to_s + " {"
-					print "\n   Value: " + scope_variables[scope_variables.keys[x]].val.to_s + ","
+					print "\n   Value: " + scope_variables[scope_variables.keys[x]].to_s + ","
 					print "\n   Datatype: " + scope_variables[scope_variables.keys[x]].type.to_s + "\n}\n\n"
 				end
 			}
@@ -220,7 +222,7 @@ class Cript
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_funs.length - 1
 					print "\nFunction Name: " + scope_funs.keys[x].to_s + " {"
-					print "\n   Block: " + scope_funs[scope_funs.keys[x]].val.to_s + ","
+					print "\n	Block: " + scope_funs[scope_funs.keys[x]].to_s + ","
 					print "\n	Params: " + scope_funs[scope_funs.keys[x]].params.to_s + "\n}\n\n"
 				end
 			}

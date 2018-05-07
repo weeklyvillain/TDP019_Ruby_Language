@@ -6,9 +6,8 @@ class INTEGER_C
 		@type = :INT
 	end
 	def to_s()
-		self.val()
+		return self.val().to_s()
 	end
-
 	def val()
 		return @value
 	end
@@ -20,6 +19,9 @@ class FLOAT_C
 	def initialize(value)
 		@value = value
 		@type = :FLOAT
+	end
+	def to_s()
+		return self.val().to_s()
 	end
 	def val()
 		return @value
@@ -33,6 +35,9 @@ class CHAR_C
 		@value = INTEGER_C.new(value.ord)
 		@type = :CHAR
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
 		return @value.val().chr()
 	end
@@ -45,6 +50,9 @@ class BOOL_C
 		@value = value
 		@type = :BOOL
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
 		return @value
 	end
@@ -56,6 +64,9 @@ class SUPER_C
 	def initialize (value)
 		@value = value
 		@type = :SUPER
+	end
+	def to_s()
+		return self.val().to_s()
 	end
 	def val()
 		return @value
@@ -71,7 +82,9 @@ class FUNCTION_C
 		@params = params
 		@block = stmt_list
 	end
-
+	def to_s()
+		return self.val().to_s()
+	end
 	def val(params = nil)
 		@@all_variables.push({})
 		@@current_scope += 1

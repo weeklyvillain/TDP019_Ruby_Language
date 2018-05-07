@@ -22,7 +22,7 @@ class ASSIGN_VAR
 	def val()
 		if !@@all_variables[@scope].key?(@variable_name)
 			@@all_variables[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
-			@@all_variables[@scope][@variable_name]
+			return @@all_variables[@scope][@variable_name]
 		else
 			puts("Trying to initialize a already existant variable!")
 			return nil
@@ -98,6 +98,9 @@ class ADD
 		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
 		if @value1 != nil and @value2 != nil
 			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
@@ -118,7 +121,7 @@ class SUBTRACT
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
 	def to_s()
-		self.val()
+		return self.val().to_s()
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
@@ -139,6 +142,10 @@ class MULTIPLY
 		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
 	end
+	def to_s()
+		return self.val().to_s()
+	end
+
 	def val()
 		if @value1 != nil and @value2 != nil
 			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
@@ -157,6 +164,9 @@ class DIVIDE
 	def initialize(a, b)
 		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
 		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
+	end
+	def to_s()
+		return self.val().to_s()
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
@@ -179,7 +189,7 @@ class STRING_C
 		@type = :STRING
 	end
 	def to_s()
-		self.val()
+		return self.val().to_s()
 	end
 	def val()
 		return @value.map{|c| c.val()}.join('')

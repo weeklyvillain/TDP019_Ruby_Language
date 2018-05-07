@@ -2,8 +2,11 @@ Integer a = 100;
 Integer b = 50;
 Integer c = a - b;
 c;
-String hej = 'Hello World';
-hej;
+String hello = 'Hello World';
+hello;
 Init fun(Integer foo, Integer bar){a + b;}
 fun();
+Bool bool1 = True;
+Bool bool2 = False;
+Bool bool3 = True;
 exit
