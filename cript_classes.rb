@@ -5,6 +5,14 @@ require_relative "cript_archetypes"
 @@current_scope = 0
 @@base_scope = 0
 
+def fix_depth(value)
+	v = value
+	if v.val().respond_to?(:val)
+		v = fix_depth(v.val())
+	end
+	return v
+end
+
 		""" Variable Handling """
 
 """ *** ASSIGN and LOOKUP *** """
@@ -37,14 +45,7 @@ class LOOKUP_VAR
 	end
 	def val(scope = @starting_scope)
 		if @@all_variables[scope].key?(@variable_name)
-			previous = @@all_variables[scope][@variable_name]
-			while true do
-				if previous.val().respond_to?(:val)
-					previous = previous.val()
-				else
-					return previous
-				end
-			end
+			return fix_depth(@@all_variables[scope][@variable_name])
 		else
 			if scope-1 >= 0
 				self.val(scope-1)
@@ -81,28 +82,22 @@ class LOOKUP_FUNC
 		if @@functions[scope].key?(@func_name)
 			@@functions[scope][@func_name].val(@params)
 		else
-			puts("Function does not exit!")
-			return nil
+			if scope-1 >= 0
+				self.val(scope-1)
+			else
+				puts("Function does not exit!")
+				return nil
 			end
 		end
 	end
-
-
-
+end
 		"""Arithmetics"""
 
 class ADD
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix(a)
-		@value2 = fix(b)
-	end
-	def fix(value)
-		v = value
-		if v.val().respond_to?(:val)
-			v = fix(v.val())
-		end
-		return v
+		@value1 = fix_depth(a)
+		@value2 = fix_depth(b)
 	end
 	def to_s()
 		return self.val().to_s()
@@ -123,15 +118,8 @@ end
 class SUBTRACT
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix(a)
-		@value2 = fix(b)
-	end
-	def fix(value)
-		v = value
-		if v.val().respond_to?(:val)
-			v = fix(v.val())
-		end
-		return v
+		@value1 = fix_depth(a)
+		@value2 = fix_depth(b)
 	end
 	def to_s()
 		return self.val().to_s()
@@ -152,15 +140,8 @@ end
 class MULTIPLY
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix(a)
-		@value2 = fix(b)
-	end
-	def fix(value)
-		v = value
-		if v.val().respond_to?(:val)
-			v = fix(v.val())
-		end
-		return v
+		@value1 = fix_depth(a)
+		@value2 = fix_depth(b)
 	end
 	def to_s()
 		return self.val().to_s()
@@ -182,15 +163,8 @@ end
 class DIVIDE
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix(a)
-		@value2 = fix(b)
-	end
-	def fix(value)
-		v = value
-		if v.val().respond_to?(:val)
-			v = fix(v.val())
-		end
-		return v
+		@value1 = fix_depth(a)
+		@value2 = fix_depth(b)
 	end
 	def to_s()
 		return self.val().to_s()
@@ -239,23 +213,35 @@ end
 """ *** COMPARISONS *** """
 
 class IF 
-	attr_accessor :value, :type
-	def initialize(value)
-		@value = value
+	attr_accessor :type
+	def initialize(condition, stmt_list, else_stmt_list)
+		@condition = condition
+		@block1 = stmt_list
+		@block2 = else_stmt_list
 		@type = :STRING
 	end
 	def to_s()
 		return self.val().to_s()
 	end
 	def val()
-		
+		@@all_variables.push({})
+		@@current_scope += 1
+		if @condition then
+			r = @block1.val()
+		else
+			r = @block2.val()
+		end
+		@@all_variables.pop()
+		@@current_scope -= 1
+		r
+
 	end
 end
 
 class AND_C
 	def initialize(value1, value2)
-		@value1 = value1
-		@value2 = value2
+		@value1 = fix_depth(value1)
+		@value2 = fix_depth(value2)
 		@type = :AND
 	end
 	def to_s()
@@ -268,8 +254,8 @@ end
 
 class OR_C
 	def initialize(value1, value2)
-		@value1 = value1
-		@value2 = value2
+		@value1 = fix_depth(value1)
+		@value2 = fix_depth(value2)
 		@type = :OR
 	end
 	def to_s()
@@ -282,8 +268,8 @@ end
 
 class EQUALS_C
 	def initialize(value1, value2)
-		@value1 = value1
-		@value2 = value2
+		@value1 = fix_depth(value1)
+		@value2 = fix_depth(value2)
 		@type = :EQUALS
 	end
 	def to_s()
@@ -313,4 +299,3 @@ class WHILE_C
 		r
 	end
 end
-

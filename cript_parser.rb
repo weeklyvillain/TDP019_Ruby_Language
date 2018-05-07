@@ -52,27 +52,19 @@ class Cript
 
 			#token(/For/) {|m| :FOR }
 			#token(/While/) {|m| :WHILE }
-
 			#token(/Console.Log/) {|m| m }
 
-
-
-
 			""" *** Operators *** """
-			#token(/>>/){|m|m}
 			
+			#token(/>>/){|m|m}
 			#token(/!=/) {|m| m }
 			#token(/>/) {|m| m }
 			#token(/>=/) {|m| m }
 			#token(/</) {|m| m }
 			#token(/<=/) {|m| m }
-			
-			
-			
 			token(/\w+/) { |m| m }
 			token(/\{\n.*\n\}/s){ |m| m }
 			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
-
 			token(/./) { |m| m.to_s }
 
 			""" *** Start of Statements *** """
@@ -86,10 +78,9 @@ class Cript
 			end
 
 			rule :STMT do
+				match(:IFSTMT) { |m| m }
+				match(:LOOPSTMT){ |m| m }
 				match(:ASSIGN) { |m| m }
-				match(:IFSTMT) {|m| m}
-				match(:LOOP)
-
 				match(:EXPR, /;?/) { |m, _| m }
 
 			end
@@ -119,12 +110,12 @@ class Cript
 			end
 
 			rule :IFSTMT do
-				match("If", :BOOL_STMT){ |_, m| IF.new(m) }
+				match("If","(", :BOOL_STMT, ")", "{", :STMTLIST, "}"){ |_, _, bool_stmt, _, _, stmt_list, _| IF.new(bool_stmt, stmt_list, nil) }
 			end
 			
 			rule :BOOL_STMT do 
 				match(:TERM, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
-				match(:TERM, :OPERATOR, :TERM){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
+				match(:TERM, :OPERATOR, :EXPR){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
 				match(:TERM){|m| m }
 			end
 
@@ -137,7 +128,7 @@ class Cript
 			rule :TERM do
 				match("True") { |_| BOOL_C.new(true) }
 				match("False") { |_| BOOL_C.new(false) }
-				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val())}
+				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val()) }
 	
 				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
@@ -187,7 +178,7 @@ class Cript
 	end
 
 	def parser(str = "")
-		if DEBUG 
+		if DEBUG_SHOW_VARIABLES 
 			print_variable_table()
 			print_func_table()
 		end
@@ -244,6 +235,7 @@ end
 
 if __FILE__ == $0
 	DEBUG = false
+	DEBUG_SHOW_VARIABLES = false
 	parser = Cript.new
 	parser.log(DEBUG)
 	if ARGV.empty?

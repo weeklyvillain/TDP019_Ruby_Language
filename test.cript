@@ -17,10 +17,18 @@ sum_num;
 String hello = 'Hello World';
 hello;
 Init fun(Integer foo, Integer bar){num_a + num_b;}
-fun();
+fun(1, 2);
 Bool bool1 = True;
 Bool bool2 = False;
-Bool bool3 = True;
-Not True;
-Bool bool4 = bool1 And bool2;
+Bool bool3 = Not False;
+Bool bool4 = Not True;
+bool1 And bool2;
+bool1 And bool3;
+bool2 And bool4;
+bool1 Or bool3;
+True == Not False;
+bool3;
+True == bool3;
+bool1 And bool1 And bool2;
+If(bool1){fun(1, 2);}
 exit;
