@@ -1,4 +1,6 @@
 1+1;
+2*3;
+2*3;
 Integer a = 100;
 Integer b = 50;
 Integer c = a - b;
@@ -11,5 +13,5 @@ Bool bool1 = True;
 Bool bool2 = False;
 Bool bool3 = True;
 Not True;
-If bool1 And Bool2;
+Bool bool4 = bool1 And bool2;
 exit

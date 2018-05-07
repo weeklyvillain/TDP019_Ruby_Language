@@ -216,6 +216,9 @@ class IF
 		@value = value
 		@type = :STRING
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
 		
 	end
@@ -227,8 +230,11 @@ class AND_C
 		@value2 = value2
 		@type = :AND
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
-		return BOOL_C.new(@value1 && @value2)
+		return BOOL_C.new(@value1.val() && @value2.val())
 	end
 end
 
@@ -238,8 +244,11 @@ class OR_C
 		@value2 = value2
 		@type = :OR
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
-		return BOOL_C.new(@value1 || @value2)
+		return BOOL_C.new(@value1.val() || @value2.val())
 	end
 end
 
@@ -249,8 +258,11 @@ class EQUALS_C
 		@value2 = value2
 		@type = :EQUALS
 	end
+	def to_s()
+		return self.val().to_s()
+	end
 	def val()
-		return BOOL_C.new(@value1 == @value2)
+		return BOOL_C.new(@value1.val() == @value2.val())
 	end
 end
 
@@ -259,8 +271,8 @@ class WHILE_C
 	attr_accessor :value, :type
 	def initialize(stmt_list, condition)
 		@block = stmt_list
-		@type = :WHILE
 		@condition = condition
+		@type = :WHILE
 	end
 	def val()
 		@@all_variables.push({})

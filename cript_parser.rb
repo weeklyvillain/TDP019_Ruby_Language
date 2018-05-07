@@ -88,7 +88,6 @@ class Cript
 			rule :STMT do
 				match(:ASSIGN) { |m| m }
 				match(:IFSTMT) {|m| m}
-				match(:BOOL_STMT){ |m| m }
 				match(:LOOP)
 
 				match(:EXPR, /;?/) { |m, _| m }
@@ -115,16 +114,17 @@ class Cript
 			rule :EXPR do
 				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
 				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
+				match(:BOOL_STMT){ |m| m}
 				match(:TERM)
 			end
 
 			rule :IFSTMT do
-				match("If", :OPERATOR_CLASS){ |_, m| IF.new(m) }
+				match("If", :BOOL_STMT){ |_, m| IF.new(m) }
 			end
 			
 			rule :BOOL_STMT do 
-				match(:EXPR, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
-				match(:EXPR, :OPERATOR, :TERM){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
+				match(:TERM, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
+				match(:TERM, :OPERATOR, :TERM){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
 				match(:TERM){|m| m }
 			end
 
@@ -139,8 +139,8 @@ class Cript
 				match("False") { |_| BOOL_C.new(false) }
 				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val())}
 	
-				match(:TERM, "*", :TERM) { |a, _, b| MULTIPLY.new(a, b) }
-				match(:TERM, "/", :TERM) { |a, _, b| DIVIDE.new(a, b) }
+				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
+				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
 				match(Integer) { |m| INTEGER_C.new(m) }
 				match(Float) { |m| FLOAT_C.new(m) }
 		
@@ -187,8 +187,10 @@ class Cript
 	end
 
 	def parser(str = "")
-		print_variable_table()
-		print_func_table()
+		if DEBUG 
+			print_variable_table()
+			print_func_table()
+		end
 		print "[Cript++]~ "
 		if str.length == 0
 			str = gets
@@ -240,16 +242,14 @@ end
 
 
 if __FILE__ == $0
-	debug = true
+	DEBUG = false
+	parser = Cript.new
+	parser.log(DEBUG)
 	if ARGV.empty?
-		c = Cript.new
-		c.log(debug)
-		c.parser()
+		parser.parser()
 	else
 		f = ARGV[0]
 		file = File.open(f, "r")
-		parser = Cript.new
-		parser.log(debug)
 		for line in file
 			parser.parser(line)
 		end
