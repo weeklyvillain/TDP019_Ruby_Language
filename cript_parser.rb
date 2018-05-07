@@ -198,6 +198,7 @@ class Cript
 			if done(str)
 				puts "Bye."
 			else
+				puts str
 				puts "=> #{@Cript.parse str}"
 				return
 			end

@@ -94,8 +94,15 @@ class LOOKUP_FUNC
 class ADD
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
+		@value1 = fix(a)
+		@value2 = fix(b)
+	end
+	def fix(value)
+		v = value
+		if v.val().respond_to?(:val)
+			v = fix(v.val())
+		end
+		return v
 	end
 	def to_s()
 		return self.val().to_s()
@@ -116,8 +123,15 @@ end
 class SUBTRACT
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
+		@value1 = fix(a)
+		@value2 = fix(b)
+	end
+	def fix(value)
+		v = value
+		if v.val().respond_to?(:val)
+			v = fix(v.val())
+		end
+		return v
 	end
 	def to_s()
 		return self.val().to_s()
@@ -138,8 +152,15 @@ end
 class MULTIPLY
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
+		@value1 = fix(a)
+		@value2 = fix(b)
+	end
+	def fix(value)
+		v = value
+		if v.val().respond_to?(:val)
+			v = fix(v.val())
+		end
+		return v
 	end
 	def to_s()
 		return self.val().to_s()
@@ -161,15 +182,22 @@ end
 class DIVIDE
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = if a.is_a?(LOOKUP_VAR) then a.val() else a end
-		@value2 = if b.is_a?(LOOKUP_VAR) then b.val() else b end
+		@value1 = fix(a)
+		@value2 = fix(b)
+	end
+	def fix(value)
+		v = value
+		if v.val().respond_to?(:val)
+			v = fix(v.val())
+		end
+		return v
 	end
 	def to_s()
 		return self.val().to_s()
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
-			return FLOAT_C.new(@value1.val() / @value2.val())
+			return FLOAT_C.new(Float(@value1.val()) / Float(@value2.val()))
 		else
 			return nil
 		end

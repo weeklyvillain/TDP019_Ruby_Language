@@ -1,13 +1,22 @@
-1+1;
-2*3;
-2*3;
-Integer a = 100;
-Integer b = 50;
-Integer c = a - b;
-c;
+1+2*3*2;
+1*2+1;
+Integer num_a = 2;
+Integer num_b = 3;
+Integer num_c = 2.1;
+Integer num_d = 3.2;
+num_a + num_b;
+num_a - num_b;
+num_c + num_d;
+num_c - num_d;
+num_a * num_b;
+num_a / num_b;
+num_c * num_d;
+num_c / num_d;
+Integer sum_num = num_a + num_b;
+sum_num;
 String hello = 'Hello World';
 hello;
-Init fun(Integer foo, Integer bar){a + b;}
+Init fun(Integer foo, Integer bar){num_a + num_b;}
 fun();
 Bool bool1 = True;
 Bool bool2 = False;
