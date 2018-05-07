@@ -183,7 +183,7 @@ class Cript
 	end
 
 	def done(str)
-		["quit", "exit", "bye", ""].include?(str.chomp)
+		["quit;", "exit;", "bye;", ""].include?(str.chomp)
 	end
 
 	def parser(str = "")

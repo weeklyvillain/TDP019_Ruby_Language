@@ -14,4 +14,4 @@ Bool bool2 = False;
 Bool bool3 = True;
 Not True;
 Bool bool4 = bool1 And bool2;
-exit
+exit;
