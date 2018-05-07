@@ -5,7 +5,6 @@ require_relative "cript_archetypes"
 @@current_scope = 0
 @@base_scope = 0
 
-
 		""" Variable Handling """
 
 """ *** ASSIGN and LOOKUP *** """
@@ -176,7 +175,9 @@ class DIVIDE
 		end
 	end
 end
-
+@@all_variables.pop()
+		@@current_scope -= 1
+		r
 
 		""" Containers """
 
@@ -210,4 +211,32 @@ end
 
 
 """ *** COMPARISONS *** """
+
+class IF 
+	attr_accessor :value, :type
+	def initialize(value)
+		@value = Array.new(value.split('').each {|c| CHAR.new(c)})
+		@type = :STRING
+	end
+	def val(key)
+		return @value.each{|c| c.val()}.join('')
+	end
+end
+
+""" *** Loops *** """
+class WHILE_C
+	attr_accessor :value, :type
+	def initialize(stmt_list)
+		@block = stmt_list
+		@type = :WHILE
+	end
+	def val(key)
+		@@all_variables.push({})
+		@@current_scope += 1
+		r = @block.val()
+		@@all_variables.pop()
+		@@current_scope -= 1
+		r
+	end
+end
 
