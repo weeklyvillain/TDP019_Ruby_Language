@@ -45,16 +45,10 @@ class Cript
 			""" *** Keywords *** """
 
 			token(/If/) { |m| m }
-			
 			token(/Not/) { |m| m }
-			token(/\!/) {|m| m }
-			
-			token(/AND/) { |m| m }
-			token(/\&\&/) {|m| m }
-			
+			token(/And/) { |m| m }
 			token(/Or/) { |m| m }
-			token(/\|\|/) {|m| m }
-
+			token(/==/) {|m| m }
 
 			#token(/For/) {|m| :FOR }
 			#token(/While/) {|m| :WHILE }
@@ -66,7 +60,7 @@ class Cript
 
 			""" *** Operators *** """
 			#token(/>>/){|m|m}
-			#token(/==/) {|m| m }
+			
 			#token(/!=/) {|m| m }
 			#token(/>/) {|m| m }
 			#token(/>=/) {|m| m }
@@ -92,9 +86,9 @@ class Cript
 			end
 
 			rule :STMT do
-				match(:FUNCDEF){ |m| m }
 				match(:ASSIGN) { |m| m }
-				match(:IFSTMT)
+				match(:IFSTMT) {|m| m}
+				match(:BOOL_STMT){ |m| m }
 				match(:LOOP)
 
 				match(:EXPR, /;?/) { |m, _| m }
@@ -105,16 +99,14 @@ class Cript
 				match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/) { |m| m }
 			end
 
-			rule :FUNCDEF do
+
+			rule :ASSIGN do
 				match(/Init/, :VARIABLE_NAME, /\(/, :PARAM_LIST, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, params, _, _, stmt_list, _|
 					ASSIGN_FUNC.new(name, params, stmt_list)
 				}
 				match(/Init/, :VARIABLE_NAME, /\(/, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, _, _, stmt_list, _|
 					ASSIGN_FUNC.new(name, nil, stmt_list)
 				}
-			end
-
-			rule :ASSIGN do
 				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
 					ASSIGN_VAR.new(type + "_C", name, value, @@current_scope)
 				}
@@ -127,16 +119,31 @@ class Cript
 			end
 
 			rule :IFSTMT do
-				match("If", :EXPR, :OPERATOR, :EXPR){ |_, a, op, b| IF.new(a, b, op) }
+				match("If", :OPERATOR_CLASS){ |_, m| IF.new(m) }
+			end
+			
+			rule :BOOL_STMT do 
+				match(:EXPR, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
+				match(:EXPR, :OPERATOR, :TERM){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
+				match(:TERM){|m| m }
+			end
+
+			rule :OPERATOR do
+				match(/And/){ |_| "AND" }
+				match(/Or/) { |_| "OR" }
+				match(/==/) { |_| "EQUALS" }
 			end
 			
 			rule :TERM do
-				match("True") { true }
-				match("False") { false }
+				match("True") { |_| BOOL_C.new(true) }
+				match("False") { |_| BOOL_C.new(false) }
+				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val())}
+	
 				match(:TERM, "*", :TERM) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :TERM) { |a, _, b| DIVIDE.new(a, b) }
-				match(Integer) { |m| m }
-				match(Float) { |m| m }
+				match(Integer) { |m| INTEGER_C.new(m) }
+				match(Float) { |m| FLOAT_C.new(m) }
+		
 				match(:STR) { |m| m }
 
 				match(:FUNC_CALL) {|m| m}

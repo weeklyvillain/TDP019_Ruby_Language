@@ -175,9 +175,7 @@ class DIVIDE
 		end
 	end
 end
-@@all_variables.pop()
-		@@current_scope -= 1
-		r
+
 
 		""" Containers """
 
@@ -215,25 +213,61 @@ end
 class IF 
 	attr_accessor :value, :type
 	def initialize(value)
-		@value = Array.new(value.split('').each {|c| CHAR.new(c)})
+		@value = value
 		@type = :STRING
 	end
-	def val(key)
-		return @value.each{|c| c.val()}.join('')
+	def val()
+		
+	end
+end
+
+class AND_C
+	def initialize(value1, value2)
+		@value1 = value1
+		@value2 = value2
+		@type = :AND
+	end
+	def val()
+		return BOOL_C.new(@value1 && @value2)
+	end
+end
+
+class OR_C
+	def initialize(value1, value2)
+		@value1 = value1
+		@value2 = value2
+		@type = :OR
+	end
+	def val()
+		return BOOL_C.new(@value1 || @value2)
+	end
+end
+
+class EQUALS_C
+	def initialize(value1, value2)
+		@value1 = value1
+		@value2 = value2
+		@type = :EQUALS
+	end
+	def val()
+		return BOOL_C.new(@value1 == @value2)
 	end
 end
 
 """ *** Loops *** """
 class WHILE_C
 	attr_accessor :value, :type
-	def initialize(stmt_list)
+	def initialize(stmt_list, condition)
 		@block = stmt_list
 		@type = :WHILE
+		@condition = condition
 	end
-	def val(key)
+	def val()
 		@@all_variables.push({})
 		@@current_scope += 1
-		r = @block.val()
+		while @condition do 
+			r = @block.val()
+		end 
 		@@all_variables.pop()
 		@@current_scope -= 1
 		r
