@@ -5,14 +5,6 @@ require_relative "cript_archetypes"
 @@current_scope = 0
 @@base_scope = 0
 
-def fix_depth(value)
-	v = value
-	if v.val().respond_to?(:val)
-		v = fix_depth(v.val())
-	end
-	return v
-end
-
 		""" Variable Handling """
 
 """ *** ASSIGN and LOOKUP *** """
@@ -38,17 +30,60 @@ class ASSIGN_VAR
 end
 
 class LOOKUP_VAR
-	attr_accessor :variable_name, :starting_scope
+	attr_accessor :variable_name, :starting_scope, :type
 	def initialize(variable_name, starting_scope)
 		@variable_name = variable_name
 		@starting_scope = starting_scope;
+		@type = :LOOKUP_VAR
 	end
-	def val(scope = @starting_scope)
-		if @@all_variables[scope].key?(@variable_name)
-			return fix_depth(@@all_variables[scope][@variable_name])
+	def to_s
+		return self.val()
+	end
+	def val(scope = 0)
+		scope = @@current_scope
+		if @@all_variables[scope][@variable_name] != nil then
+			variable = @@all_variables[scope][@variable_name]
+			if variable.is_a? LOOKUP_VAR then
+				variable = variable.val()
+				while variable.is_a? LOOKUP_VAR
+					variable = variable.val()
+				end
+				return variable
+			else
+				return variable.val()
+			end
 		else
 			if scope-1 >= 0
-				self.val(scope-1)
+				return self.val(scope-1)
+			else
+				puts("Variable does not exit!")
+				return nil
+			end
+		end
+	end
+end
+
+class RE_VAR
+	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
+	def initialize (variable_name, variable_value, scope)
+		@type = :RE_VAR
+		@variable_name = variable_name
+		@variable_value = variable_value
+		@scope = scope
+	end
+	def val(scope = @@current_scope)
+		if @@all_variables[scope][@variable_name] != nil then
+			value = @variable_value.val()
+			if value.is_a? LOOKUP_VAR
+				value = value.val()
+				while value.is_a? LOOKUP_VAR
+					value = value.val()
+				end
+				return @@all_variables[scope][@variable_name].value = value.value
+			end
+		else
+			if scope-1 >= 0
+				return self.val(scope-1)
 			else
 				puts("Variable does not exit!")
 				return nil
@@ -96,8 +131,10 @@ end
 class ADD
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix_depth(a)
-		@value2 = fix_depth(b)
+		@value1 = a
+
+		@value2 = b
+		@value = 0
 	end
 	def to_s()
 		return self.val().to_s()
@@ -105,9 +142,11 @@ class ADD
 	def val()
 		if @value1 != nil and @value2 != nil
 			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				return FLOAT_C.new(@value1.val() + @value2.val())
+				@value = FLOAT_C.new(@value1.val()+@value2.val())
+				return @value
 			else
-				return INTEGER_C.new(@value1.val() + @value2.val())
+				@value = INTEGER_C.new(@value1.val()+@value2.val())
+				return @value
 			end
 		else
 			return nil
@@ -118,8 +157,9 @@ end
 class SUBTRACT
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix_depth(a)
-		@value2 = fix_depth(b)
+		@value1 = a
+		@value2 = b
+		@value = 0
 	end
 	def to_s()
 		return self.val().to_s()
@@ -127,9 +167,10 @@ class SUBTRACT
 	def val()
 		if @value1 != nil and @value2 != nil
 			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				return FLOAT_C.new(@value1.val() - @value2.val())
+				@value = FLOAT_C.new(@value1.val()-@value2.val())
+				return @value
 			else
-				return INTEGER_C.new(@value1.val() - @value2.val())
+				return INTEGER_C.new(@value1.val()-@value2.val())
 			end
 		else
 			return nil
@@ -140,8 +181,9 @@ end
 class MULTIPLY
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix_depth(a)
-		@value2 = fix_depth(b)
+		@value1 = a
+		@value2 = b
+		@value = 0
 	end
 	def to_s()
 		return self.val().to_s()
@@ -150,9 +192,9 @@ class MULTIPLY
 	def val()
 		if @value1 != nil and @value2 != nil
 			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				return FLOAT_C.new(@value1.val() * @value2.val())
+				return FLOAT_C.new(@value1.val()*@value2.val())
 			else
-				return INTEGER_C.new(@value1.val() * @value2.val())
+				return INTEGER_C.new(@value1.val()*@value2.val())
 			end
 		else
 			return nil
@@ -163,15 +205,16 @@ end
 class DIVIDE
 	attr_accessor :value
 	def initialize(a, b)
-		@value1 = fix_depth(a)
-		@value2 = fix_depth(b)
+		@value1 = a
+		@value2 = b
+		@value = 0
 	end
 	def to_s()
 		return self.val().to_s()
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
-			return FLOAT_C.new(Float(@value1.val()) / Float(@value2.val()))
+			return FLOAT_C.new(@value1.val()/@value2.val())
 		else
 			return nil
 		end
@@ -181,21 +224,7 @@ end
 
 		""" Containers """
 
-""" *** STRING *** """
-class STRING_C
-	attr_accessor :value, :type
-	def initialize(value)
-		@value = Array.new()
-		value.split('').each {|c| @value << CHAR_C.new(c)}
-		@type = :STRING
-	end
-	def to_s()
-		return self.val().to_s()
-	end
-	def val()
-		return @value.map{|c| c.val()}.join('')
-	end
-end
+
 
 """ *** ARRAY *** """
 class ARRAY
@@ -212,7 +241,7 @@ end
 
 """ *** COMPARISONS *** """
 
-class IF 
+class IF_C
 	attr_accessor :type
 	def initialize(condition, stmt_list, else_stmt_list)
 		@condition = condition
@@ -226,10 +255,14 @@ class IF
 	def val()
 		@@all_variables.push({})
 		@@current_scope += 1
-		if @condition then
+		if fix_depth(@condition) then
 			r = @block1.val()
 		else
-			r = @block2.val()
+			if @block2 != nil then
+				r = @block2.val()
+			else
+				r = nil
+			end
 		end
 		@@all_variables.pop()
 		@@current_scope -= 1
@@ -240,43 +273,43 @@ end
 
 class AND_C
 	def initialize(value1, value2)
-		@value1 = fix_depth(value1)
-		@value2 = fix_depth(value2)
+		@value1 = value1
+		@value2 = value2
 		@type = :AND
 	end
 	def to_s()
 		return self.val().to_s()
 	end
 	def val()
-		return BOOL_C.new(@value1.val() && @value2.val())
+		return BOOL_C.new(@value1.value && @value2.value)
 	end
 end
 
 class OR_C
 	def initialize(value1, value2)
-		@value1 = fix_depth(value1)
-		@value2 = fix_depth(value2)
+		@value1 = value1
+		@value2 = value2
 		@type = :OR
 	end
 	def to_s()
 		return self.val().to_s()
 	end
 	def val()
-		return BOOL_C.new(@value1.val() || @value2.val())
+		return BOOL_C.new(@value1.value || @value2.value)
 	end
 end
 
 class EQUALS_C
 	def initialize(value1, value2)
-		@value1 = fix_depth(value1)
-		@value2 = fix_depth(value2)
+		@value1 = value1
+		@value2 = value2
 		@type = :EQUALS
 	end
 	def to_s()
 		return self.val().to_s()
 	end
 	def val()
-		return BOOL_C.new(@value1.val() == @value2.val())
+		return BOOL_C.new(@value1.value == @value2.value)
 	end
 end
 
@@ -291,9 +324,9 @@ class WHILE_C
 	def val()
 		@@all_variables.push({})
 		@@current_scope += 1
-		while @condition do 
+		while @condition.val() do
 			r = @block.val()
-		end 
+		end
 		@@all_variables.pop()
 		@@current_scope -= 1
 		r

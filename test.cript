@@ -1,34 +1,15 @@
-1+2*3*2;
-1*2+1;
-Integer num_a = 2;
-Integer num_b = 3;
-Integer num_c = 2.1;
-Integer num_d = 3.2;
-num_a + num_b;
-num_a - num_b;
-num_c + num_d;
-num_c - num_d;
-num_a * num_b;
-num_a / num_b;
-num_c * num_d;
-num_c / num_d;
-Integer sum_num = num_a + num_b;
-sum_num;
-String hello = 'Hello World';
-hello;
-Init fun(Integer foo, Integer bar){num_a + num_b;}
-fun(1, 2);
-Bool bool1 = True;
-Bool bool2 = False;
-Bool bool3 = Not False;
-Bool bool4 = Not True;
-bool1 And bool2;
-bool1 And bool3;
-bool2 And bool4;
-bool1 Or bool3;
-True == Not False;
-bool3;
-True == bool3;
-bool1 And bool1 And bool2;
-If(bool1){fun(1, 2);}
-exit;
+Integer int_a = 2;
+Integer int_b = 3;
+    int_a + int_b;
+    int_a - int_b;
+    int_a * int_b;
+    int_a / int_b;
+    Integer int_f = int_a+int_b*2;
+        int_f;
+int_a = 1;
+
+Init fun(Integer foo, Integer bar){
+    foo;
+}
+
+fun(1, 5);

@@ -55,7 +55,7 @@ class Cript
 			#token(/Console.Log/) {|m| m }
 
 			""" *** Operators *** """
-			
+
 			#token(/>>/){|m|m}
 			#token(/!=/) {|m| m }
 			#token(/>/) {|m| m }
@@ -63,7 +63,7 @@ class Cript
 			#token(/</) {|m| m }
 			#token(/<=/) {|m| m }
 			token(/\w+/) { |m| m }
-			token(/\{\n.*\n\}/s){ |m| m }
+			token(/\{.*\}/s){ |m| m }
 			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
 			token(/./) { |m| m.to_s }
 
@@ -73,14 +73,15 @@ class Cript
 			end
 
 			rule :STMTLIST do
-				match(:STMT, :STMTLIST)
-				match(:STMT)
+				match(:STMT, :STMTLIST) { |s, sl| STMTLIST_C.new(s,sl) }
+				match(:STMT) { |s| STMTLIST_C.new(s,nil) }
 			end
 
 			rule :STMT do
+				match(:ASSIGN) { |m| m }
 				match(:IFSTMT) { |m| m }
 				match(:LOOPSTMT){ |m| m }
-				match(:ASSIGN) { |m| m }
+
 				match(:EXPR, /;?/) { |m, _| m }
 
 			end
@@ -100,6 +101,9 @@ class Cript
 				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
 					ASSIGN_VAR.new(type + "_C", name, value, @@current_scope)
 				}
+				match(:VARIABLE_NAME, "=", :EXPR, ";") { |name, _, value, _|
+					RE_VAR.new(name, value, @@current_scope)
+				}
 			end
 
 			rule :EXPR do
@@ -110,10 +114,10 @@ class Cript
 			end
 
 			rule :IFSTMT do
-				match("If","(", :BOOL_STMT, ")", "{", :STMTLIST, "}"){ |_, _, bool_stmt, _, _, stmt_list, _| IF.new(bool_stmt, stmt_list, nil) }
+				match("If","(", :BOOL_STMT, ")", "{", :STMTLIST, "}"){ |_, _, bool_stmt, _, _, stmt_list, _| IF_C.new(bool_stmt, stmt_list, nil) }
 			end
-			
-			rule :BOOL_STMT do 
+
+			rule :BOOL_STMT do
 				match(:TERM, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
 				match(:TERM, :OPERATOR, :EXPR){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
 				match(:TERM){|m| m }
@@ -124,17 +128,17 @@ class Cript
 				match(/Or/) { |_| "OR" }
 				match(/==/) { |_| "EQUALS" }
 			end
-			
+
 			rule :TERM do
 				match("True") { |_| BOOL_C.new(true) }
 				match("False") { |_| BOOL_C.new(false) }
 				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val()) }
-	
+
 				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
 				match(Integer) { |m| INTEGER_C.new(m) }
 				match(Float) { |m| FLOAT_C.new(m) }
-		
+
 				match(:STR) { |m| m }
 
 				match(:FUNC_CALL) {|m| m}
@@ -164,7 +168,7 @@ class Cript
 				match(:VARIABLE_TYPE, :VARIABLE_NAME){ |type, name| [name, type] }
 				match(""){nil}
 			end
-			
+
 			rule :ARGUMENT_LIST do
 				match(:EXPR, ',', :ARGUMENT_LIST){ |m, _, n| [n] << m }
 				match(:EXPR){ |m| m }
@@ -178,21 +182,28 @@ class Cript
 	end
 
 	def parser(str = "")
-		if DEBUG_SHOW_VARIABLES 
-			print_variable_table()
-			print_func_table()
-		end
-		print "[Cript++]~ "
+
+
 		if str.length == 0
+			print "[Cript++]~ "
 			str = gets
-		else
-			if done(str)
-				puts "Bye."
-			else
-				puts str
-				puts "=> #{@Cript.parse str}"
-				return
+			while !done(str)
+				if DEBUG_SHOW_VARIABLES
+					print_variable_table()
+					print_func_table()
+				end
+				puts  "=>#{@Cript.parse str}"
+				print "[Cript++]~ "
+				str = gets
 			end
+		else
+
+			puts  "=>#{@Cript.parse str}"
+			if DEBUG_SHOW_VARIABLES
+				print_variable_table()
+				print_func_table()
+			end
+			return
 		end
 	end
 
@@ -223,7 +234,6 @@ class Cript
 				puts "\nScope: " + scope.to_s
 				for x in 0..scope_funs.length - 1
 					print "\nFunction Name: " + scope_funs.keys[x].to_s + " {"
-					print "\n	Block: " + scope_funs[scope_funs.keys[x]].to_s + ","
 					print "\n	Params: " + scope_funs[scope_funs.keys[x]].params.to_s + "\n}\n\n"
 				end
 			}
@@ -243,8 +253,6 @@ if __FILE__ == $0
 	else
 		f = ARGV[0]
 		file = File.open(f, "r")
-		for line in file
-			parser.parser(line)
-		end
+		parser.parser(file.read)
 	end
 end

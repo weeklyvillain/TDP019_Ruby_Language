@@ -5,11 +5,24 @@ class INTEGER_C
 		@value = value
 		@type = :INT
 	end
+	def +(y)
+		return @value + y.value
+	end
+	def -(y)
+		return @value - y.value
+	end
+	def *(y)
+		return @value * y.value
+	end
+	def /(y)
+		return @value / y.value
+	end
+
 	def to_s()
-		return self.val().to_s()
+		return value.to_s()
 	end
 	def val()
-		return @value
+		return self
 	end
 end
 
@@ -20,11 +33,24 @@ class FLOAT_C
 		@value = value
 		@type = :FLOAT
 	end
+	def +(y)
+		return @value + y.value
+	end
+	def -(y)
+		return @value - y.value
+	end
+	def *(y)
+		return @value * y.value
+	end
+	def /(y)
+		return @value / y.value
+	end
+
 	def to_s()
-		return self.val().to_s()
+		return value.to_s()
 	end
 	def val()
-		return @value
+		return self
 	end
 end
 
@@ -36,10 +62,25 @@ class CHAR_C
 		@type = :CHAR
 	end
 	def to_s()
-		return self.val().to_s()
+		return value.chr().to_s()
 	end
 	def val()
-		return @value.val().chr()
+		return self
+	end
+end
+
+""" *** STRING *** """
+class STRING_C
+	attr_accessor :value, :type
+	def initialize(value)
+		@value = value
+		@type = :STRING
+	end
+	def to_s()
+		return value.to_s()
+	end
+	def val()
+		return self
 	end
 end
 
@@ -50,11 +91,12 @@ class BOOL_C
 		@value = value
 		@type = :BOOL
 	end
+
 	def to_s()
-		return self.val().to_s()
+		return value.to_s()
 	end
 	def val()
-		return @value
+		return self
 	end
 end
 
@@ -66,10 +108,10 @@ class SUPER_C
 		@type = :SUPER
 	end
 	def to_s()
-		return self.val().to_s()
+		return  @value.to_s()
 	end
 	def val()
-		return @value
+		return self
 	end
 end
 
@@ -82,30 +124,39 @@ class FUNCTION_C
 		@params = params
 		@block = stmt_list
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+	# def to_s()
+	# 	return self.val().to_s()
+	# end
 	def val(params = nil)
 		@@all_variables.push({})
 		@@current_scope += 1
-#		if params != nil
-			# (0..@params.length).each{ |i| 
-			# 	begin 
-			# 		if params[i].respond_to?(:val)
-			# 			params[i] = params[i].val
-					
-			# 		@@all_variables[@@current_scope][@params[i]['name']] = Object.const_get(@params[i]['type']).new(params[i]) 
-			# 	rescue
-			# 		if @params[i].is_a? DefaultParam do
-			# 			# assigna värdet från defa
-			# 		else
-			# 			reraise
-			# 		end
-			# 	end
-			
+		if params != nil
+			 (-1..@params.length - 1).each { |i|
+					@@all_variables[@@current_scope][@params[i][0]] = params[i]
+				}
+		end
 		r = @block.val()
 		@@all_variables.pop()
 		@@current_scope -= 1
 		r
+	end
+end
+
+class STMTLIST_C
+	attr_accessor :stmt, :stmt_list
+	def initialize(stmt, stmt_list)
+		@stmt = stmt
+		@stmt_list = stmt_list
+	end
+	def to_s()
+		self.val()
+	end
+	def val()
+		r = @stmt.val()
+		if @stmt_list != nil
+			@stmt_list.val()
+		else
+			return r
+		end
 	end
 end
