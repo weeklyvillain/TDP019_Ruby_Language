@@ -35,7 +35,7 @@ class Cript
 
 			token(/Char/) { |m| m }
 
-			token(/Init/) { |m| m }
+
 
 			""" *** Container Typing *** """
 
@@ -43,15 +43,17 @@ class Cript
 			token(/Array/) { |m| m }
 
 			""" *** Keywords *** """
-
+			token(/Init/) { |m| m }
 			token(/If/) { |m| m }
 			token(/Not/) { |m| m }
 			token(/And/) { |m| m }
 			token(/Or/) { |m| m }
-			token(/==/) {|m| m }
+			token(/==/) { |m| m }
+			token(/Return/){ |m| m }
+			token(/While/) { |m| m }
 
 			#token(/For/) {|m| :FOR }
-			#token(/While/) {|m| :WHILE }
+
 			#token(/Console.Log/) {|m| m }
 
 			""" *** Operators *** """
@@ -81,7 +83,7 @@ class Cript
 				match(:ASSIGN) { |m| m }
 				match(:IFSTMT) { |m| m }
 				match(:LOOPSTMT){ |m| m }
-
+				match(/Return/, :EXPR, /;?/) { |_, m, _| RETURN_C.new(m) }
 				match(:EXPR, /;?/) { |m, _| m }
 
 			end
@@ -106,12 +108,7 @@ class Cript
 				}
 			end
 
-			rule :EXPR do
-				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
-				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
-				match(:BOOL_STMT){ |m| m}
-				match(:TERM)
-			end
+
 
 			rule :IFSTMT do
 				match("If","(", :BOOL_STMT, ")", "{", :STMTLIST, "}"){ |_, _, bool_stmt, _, _, stmt_list, _| IF_C.new(bool_stmt, stmt_list, nil) }
@@ -123,10 +120,22 @@ class Cript
 				match(:TERM){|m| m }
 			end
 
+			rule :LOOPSTMT do
+				match(/While/, "(", :BOOL_STMT, ")", "{", :STMTLIST, "}") { |_, _, cond, _, _, stmt, _| WHILE_C.new(stmt, cond) }
+			end
+
 			rule :OPERATOR do
 				match(/And/){ |_| "AND" }
 				match(/Or/) { |_| "OR" }
 				match(/==/) { |_| "EQUALS" }
+			end
+
+			rule :EXPR do
+				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
+				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
+				match(:BOOL_STMT){ |m| m}
+
+				match(:TERM)
 			end
 
 			rule :TERM do
@@ -154,7 +163,7 @@ class Cript
 			end
 
 			rule :STR do
-				match(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m[1..-2] }
+				match(/["'][a-zA-Z\_\,\. ]+["']/) { |m| STRING_C.new(m[1..-2]) }
 				match(/["']/, /["']/) { "" }
 			end
 
@@ -244,7 +253,7 @@ end
 
 
 if __FILE__ == $0
-	DEBUG = false
+	DEBUG = true
 	DEBUG_SHOW_VARIABLES = false
 	parser = Cript.new
 	parser.log(DEBUG)

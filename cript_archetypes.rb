@@ -54,21 +54,6 @@ class FLOAT_C
 	end
 end
 
-"""********** CHAR **********"""
-class CHAR_C
-	attr_accessor :value, :type
-	def initialize(value)
-		@value = INTEGER_C.new(value.ord)
-		@type = :CHAR
-	end
-	def to_s()
-		return value.chr().to_s()
-	end
-	def val()
-		return self
-	end
-end
-
 """ *** STRING *** """
 class STRING_C
 	attr_accessor :value, :type
@@ -135,10 +120,12 @@ class FUNCTION_C
 					@@all_variables[@@current_scope][@params[i][0]] = params[i]
 				}
 		end
-		r = @block.val()
+		r = @block
+		r = r.val()
+
 		@@all_variables.pop()
 		@@current_scope -= 1
-		r
+		return r
 	end
 end
 
@@ -152,6 +139,13 @@ class STMTLIST_C
 		self.val()
 	end
 	def val()
+		begin
+			if @stmt.is_a?(RETURN_C)
+				raise Interrupt
+			end
+		rescue Interrupt => e
+			return @stmt.val()
+		end
 		r = @stmt.val()
 		if @stmt_list != nil
 			@stmt_list.val()

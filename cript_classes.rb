@@ -20,7 +20,7 @@ class ASSIGN_VAR
 	end
 	def val()
 		if !@@all_variables[@scope].key?(@variable_name)
-			@@all_variables[@scope][@variable_name] = Object.const_get(@variable_type).new(@variable_value)
+			@@all_variables[@scope][@variable_name] = @variable_value
 			return @@all_variables[@scope][@variable_name]
 		else
 			puts("Trying to initialize a already existant variable!")
@@ -39,8 +39,7 @@ class LOOKUP_VAR
 	def to_s
 		return self.val()
 	end
-	def val(scope = 0)
-		scope = @@current_scope
+	def val(scope = @@current_scope)
 		if @@all_variables[scope][@variable_name] != nil then
 			variable = @@all_variables[scope][@variable_name]
 			if variable.is_a? LOOKUP_VAR then
@@ -72,15 +71,11 @@ class RE_VAR
 		@scope = scope
 	end
 	def val(scope = @@current_scope)
-		if @@all_variables[scope][@variable_name] != nil then
+		if @@all_variables[scope].has_key?(@variable_name) then
+			old_variable = @@all_variables[scope][@variable_name].val()
 			value = @variable_value.val()
-			if value.is_a? LOOKUP_VAR
-				value = value.val()
-				while value.is_a? LOOKUP_VAR
-					value = value.val()
-				end
-				return @@all_variables[scope][@variable_name].value = value.value
-			end
+			r = @@all_variables[scope][@variable_name].value = value.value
+			return r
 		else
 			if scope-1 >= 0
 				return self.val(scope-1)
@@ -132,7 +127,6 @@ class ADD
 	attr_accessor :value
 	def initialize(a, b)
 		@value1 = a
-
 		@value2 = b
 		@value = 0
 	end
@@ -192,9 +186,11 @@ class MULTIPLY
 	def val()
 		if @value1 != nil and @value2 != nil
 			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				return FLOAT_C.new(@value1.val()*@value2.val())
+				@value = FLOAT_C.new(@value1.val()*@value2.val())
+				return @value
 			else
-				return INTEGER_C.new(@value1.val()*@value2.val())
+				@value = INTEGER_C.new(@value1.val()*@value2.val())
+				return @value
 			end
 		else
 			return nil
@@ -255,7 +251,7 @@ class IF_C
 	def val()
 		@@all_variables.push({})
 		@@current_scope += 1
-		if fix_depth(@condition) then
+		if @condition.val().value then
 			r = @block1.val()
 		else
 			if @block2 != nil then
@@ -270,6 +266,8 @@ class IF_C
 
 	end
 end
+
+""" *** OPERATORS *** """
 
 class AND_C
 	def initialize(value1, value2)
@@ -309,9 +307,10 @@ class EQUALS_C
 		return self.val().to_s()
 	end
 	def val()
-		return BOOL_C.new(@value1.value == @value2.value)
+		return BOOL_C.new(@value1.val().value == @value2.val().value)
 	end
 end
+
 
 """ *** Loops *** """
 class WHILE_C
@@ -321,14 +320,29 @@ class WHILE_C
 		@condition = condition
 		@type = :WHILE
 	end
+
 	def val()
 		@@all_variables.push({})
 		@@current_scope += 1
-		while @condition.val() do
+		while @condition.val().value do
 			r = @block.val()
 		end
 		@@all_variables.pop()
 		@@current_scope -= 1
 		r
+	end
+end
+
+""" *** RETURN *** """
+
+class RETURN_C
+	attr_accessor :value, :type
+	def initialize(value)
+		@value = value
+		@type = :RETURN
+	end
+
+	def val()
+		@value.val()
 	end
 end

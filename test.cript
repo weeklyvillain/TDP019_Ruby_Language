@@ -1,15 +1,16 @@
-Integer int_a = 2;
-Integer int_b = 3;
-    int_a + int_b;
-    int_a - int_b;
-    int_a * int_b;
-    int_a / int_b;
-    Integer int_f = int_a+int_b*2;
-        int_f;
-int_a = 1;
+Integer int_a = 1;
+Integer int_b = 2;
+    Integer int_c = int_a+int_b*2/2;
 
-Init fun(Integer foo, Integer bar){
-    foo;
+Float float_a = 1.1;
+Float float_b = 2.1;
+
+String Hello = "Hello World";
+Hello;
+
+Init fun(){
+    int_a = 2;
+    Return 1;
+    int_a = 3;
 }
-
-fun(1, 5);
+fun();
