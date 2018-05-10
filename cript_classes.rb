@@ -121,6 +121,26 @@ class LOOKUP_FUNC
 		end
 	end
 end
+
+
+class PRINT_C
+		def initialize(expr)
+				@expr = expr
+		end
+
+		def val()
+			if @expr.is_a? LOOKUP_VAR then
+				@expr = @expr.val()
+				while @expr.is_a? LOOKUP_VAR
+					@expr = @expr.val()
+				end
+				print(@expr.value, "\n")
+			else
+				print(@expr.val().value, "\n")
+			end
+		end
+
+end
 		"""Arithmetics"""
 
 class ADD
