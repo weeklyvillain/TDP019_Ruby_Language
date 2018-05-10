@@ -45,12 +45,14 @@ class Cript
 			""" *** Keywords *** """
 			token(/Init/) { |m| m }
 			token(/If/) { |m| m }
+			token(/Else/){ |m| m }
 			token(/Not/) { |m| m }
 			token(/And/) { |m| m }
 			token(/Or/) { |m| m }
 			token(/==/) { |m| m }
 			token(/Return/){ |m| m }
 			token(/While/) { |m| m }
+
 
 			#token(/For/) {|m| :FOR }
 
@@ -80,10 +82,10 @@ class Cript
 			end
 
 			rule :STMT do
-				match(:ASSIGN) { |m| m }
 				match(:IFSTMT) { |m| m }
 				match(:LOOPSTMT){ |m| m }
 				match(/Return/, :EXPR, /;?/) { |_, m, _| RETURN_C.new(m) }
+				match(:ASSIGN) { |m| m }
 				match(:EXPR, /;?/) { |m, _| m }
 
 			end
@@ -111,7 +113,15 @@ class Cript
 
 
 			rule :IFSTMT do
-				match("If","(", :BOOL_STMT, ")", "{", :STMTLIST, "}"){ |_, _, bool_stmt, _, _, stmt_list, _| IF_C.new(bool_stmt, stmt_list, nil) }
+				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/, /Else/, /{/, :STMTLIST, /}/){
+					|_, _, bool_stmt, _, _, stmt_list1, _, _, _, stmt_list2, _|
+						IF_C.new(bool_stmt, stmt_list1, stmt_list2) 
+					}
+				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/){
+					 |_, _, bool_stmt, _, _, stmt_list, _| 
+					 IF_C.new(bool_stmt, stmt_list, nil) 
+					}
+
 			end
 
 			rule :BOOL_STMT do
@@ -186,13 +196,7 @@ class Cript
 		end
 	end
 
-	def done(str)
-		["quit;", "exit;", "bye;", ""].include?(str.chomp)
-	end
-
 	def parser(str = "")
-
-
 		if str.length == 0
 			print "[Cript++]~ "
 			str = gets
@@ -206,7 +210,6 @@ class Cript
 				str = gets
 			end
 		else
-
 			puts  "=>#{@Cript.parse str}"
 			if DEBUG_SHOW_VARIABLES
 				print_variable_table()
@@ -216,6 +219,10 @@ class Cript
 		end
 	end
 
+	def done(str)
+		["quit;", "exit;", "bye;", ""].include?(str.chomp)
+	end
+	
 	def log(state = false)
 		if state
 			@Cript.logger.level = Logger::DEBUG
@@ -249,8 +256,6 @@ class Cript
 		end
 	end
 end
-
-
 
 if __FILE__ == $0
 	DEBUG = true

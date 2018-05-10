@@ -1,16 +1,19 @@
 Integer int_a = 1;
 Integer int_b = 2;
-    Integer int_c = int_a+int_b*2/2;
+Integer int_c = int_a+int_b*5/2;
 
 Float float_a = 1.1;
 Float float_b = 2.1;
 
-String Hello = "Hello World";
-Hello;
+Bool bool1 = True;
 
-Init fun(){
-    int_a = 2;
-    Return 1;
-    int_a = 3;
+Integer x = 0;
+
+While(bool1){
+    If(x == 5){
+        bool1 = False;
+    }Else{
+        x = x + 1;
+    }
 }
-fun();
+x;
