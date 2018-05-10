@@ -16,6 +16,8 @@ class Cript
 			token(/[\s\n]+/)
 			token(/\t+/)
 
+			token(/\/\/.*\n/)
+
 			""" *** Separators *** """
 
 			token(/^\;/) { |m| m }
@@ -67,7 +69,6 @@ class Cript
 			#token(/</) {|m| m }
 			#token(/<=/) {|m| m }
 			token(/\w+/) { |m| m }
-			token(/\{.*\}/s){ |m| m }
 			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
 			token(/./) { |m| m.to_s }
 
