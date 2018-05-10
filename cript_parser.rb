@@ -54,6 +54,7 @@ class Cript
 			token(/==/) { |m| m }
 			token(/Return/){ |m| m }
 			token(/While/) { |m| m }
+			token(/Print/) { |m| m }
 
 
 			#token(/For/) {|m| :FOR }
@@ -116,11 +117,11 @@ class Cript
 			rule :IFSTMT do
 				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/, /Else/, /{/, :STMTLIST, /}/){
 					|_, _, bool_stmt, _, _, stmt_list1, _, _, _, stmt_list2, _|
-						IF_C.new(bool_stmt, stmt_list1, stmt_list2) 
+						IF_C.new(bool_stmt, stmt_list1, stmt_list2)
 					}
 				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/){
-					 |_, _, bool_stmt, _, _, stmt_list, _| 
-					 IF_C.new(bool_stmt, stmt_list, nil) 
+					 |_, _, bool_stmt, _, _, stmt_list, _|
+					 IF_C.new(bool_stmt, stmt_list, nil)
 					}
 
 			end
@@ -160,9 +161,11 @@ class Cript
 				match(Float) { |m| FLOAT_C.new(m) }
 
 				match(:STR) { |m| m }
-
+				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, @@current_scope) }
+
+
 			end
 
 			rule :VARIABLE_TYPE do
@@ -223,7 +226,7 @@ class Cript
 	def done(str)
 		["quit;", "exit;", "bye;", ""].include?(str.chomp)
 	end
-	
+
 	def log(state = false)
 		if state
 			@Cript.logger.level = Logger::DEBUG
@@ -259,7 +262,7 @@ class Cript
 end
 
 if __FILE__ == $0
-	DEBUG = true
+	DEBUG = false
 	DEBUG_SHOW_VARIABLES = false
 	parser = Cript.new
 	parser.log(DEBUG)
