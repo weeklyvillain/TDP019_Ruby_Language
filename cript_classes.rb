@@ -1,5 +1,14 @@
 require_relative "cript_archetypes"
 
+##############################################################################
+#
+#						 Classes for the Cript++ Language
+#
+# 					Built by Jimbj685 and Filer358 in 05/2018
+#
+##############################################################################
+
+
 $all_variables = [{}]
 $functions = [{}]
 $current_scope = 0
@@ -18,6 +27,7 @@ class ASSIGN_VAR
 		@variable_value = variable_value
 		@scope = $current_scope
 	end
+
 	def val()
 		if !$all_variables[@scope].key?(@variable_name)
 			$all_variables[@scope][@variable_name] = @variable_value
@@ -35,9 +45,7 @@ class LOOKUP_VAR
 		@variable_name = variable_name
 		@type = :LOOKUP_VAR
 	end
-	def to_s
-		return self.val()
-	end
+
 	def val(scope = $current_scope)
 		if $all_variables[scope][@variable_name] != nil then
 			variable = $all_variables[scope][@variable_name]
@@ -68,6 +76,7 @@ class RE_VAR
 		@variable_name = variable_name
 		@variable_value = variable_value
 	end
+
 	def val(scope = $current_scope)
 		if $all_variables[scope].has_key?(@variable_name) then
 			value = @variable_value.val()
@@ -92,6 +101,7 @@ class ASSIGN_FUNC
 		@params = params
 		@block = stmt_list
 	end
+
 	def val()
 		$functions[$current_scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block)
 		$functions[$current_scope][@func_name]
@@ -104,6 +114,7 @@ class LOOKUP_FUNC
 		@func_name = func_name
 		@params = params
 	end
+
 	def val(scope = @starting_scope)
 		if $functions[scope].key?(@func_name)
 			$functions[scope][@func_name].val(@params)
@@ -118,18 +129,7 @@ class LOOKUP_FUNC
 	end
 end
 
-class PRINT_C
-		def initialize(expr)
-				@expr = expr
-		end
-		def val()
-			r = @expr.val()
-			print(r.value, "\n")
-			r
-		end
-end
-
-	#	"""Arithmetics"""
+######    Arithmetics    #####
 
 class ADD
 	attr_accessor :value
@@ -138,9 +138,7 @@ class ADD
 		@value2 = b
 		@value = 0
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		if @value1 != nil and @value2 != nil
 			@value1 = @value1.val()
@@ -167,9 +165,7 @@ class SUBTRACT
 		@value2 = b
 		@value = 0
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		if @value1 != nil and @value2 != nil
 			@value1 = @value1.val()
@@ -195,9 +191,6 @@ class MULTIPLY
 		@value1 = a
 		@value2 = b
 		@value = 0
-	end
-	def to_s()
-		return self.val().to_s()
 	end
 
 	def val()
@@ -226,9 +219,7 @@ class DIVIDE
 		@value2 = b
 		@value = 0
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		if @value1 != nil and @value2 != nil
 			@value1 = @value1.val()
@@ -248,24 +239,6 @@ class DIVIDE
 	end
 end
 
-
-		#""" Containers """
-
-
-
-#""" *** ARRAY *** """
-class ARRAY
-	attr_accessor :value, :type
-	def initialize(value)
-		@value = Array.new(value.split('').each {|c| CHAR.new(c)})
-		@type = :STRING
-	end
-	def val(key)
-		return @value.each{|c| c.val()}.join('')
-	end
-end
-
-
 #""" *** COMPARISONS *** """
 
 class IF_C
@@ -276,9 +249,7 @@ class IF_C
 		@block2 = else_stmt_list
 		@type = :STRING
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		$all_variables.push({})
 		$current_scope += 1
@@ -306,9 +277,7 @@ class AND_C
 		@value2 = value2
 		@type = :AND
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		return BOOL_C.new(@value1.value && @value2.value)
 	end
@@ -320,9 +289,7 @@ class OR_C
 		@value2 = value2
 		@type = :OR
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		return BOOL_C.new(@value1.value || @value2.value)
 	end
@@ -334,9 +301,7 @@ class EQUALS_C
 		@value2 = value2
 		@type = :EQUALS
 	end
-	def to_s()
-		return self.val().to_s()
-	end
+
 	def val()
 		return BOOL_C.new(@value1.val().value == @value2.val().value)
 	end
@@ -365,6 +330,18 @@ class WHILE_C
 end
 
 #""" *** built-in *** """
+
+class PRINT_C
+	def initialize(expr)
+			@expr = expr
+	end
+
+	def val()
+		r = @expr.val()
+		print(r.value, "\n")
+		r
+	end
+end
 
 class RETURN_C
 	attr_accessor :value, :type

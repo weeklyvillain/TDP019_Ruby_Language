@@ -1,3 +1,12 @@
+##############################################################################
+#
+#					Archetype classes for the Cript++ Language
+#
+# 					Built by Jimbj685 and Filer358 in 05/2018
+#
+##############################################################################
+
+
 #""********** INTEGER **********"""
 class INTEGER_C
 	attr_accessor :value, :type
@@ -9,22 +18,23 @@ class INTEGER_C
 		end
 		@type = :INT
 	end
+
 	def +(y)
 		return @value + y.value
 	end
+
 	def -(y)
 		return @value - y.value
 	end
+
 	def *(y)
 		return @value * y.value
 	end
+
 	def /(y)
 		return @value / y.value
 	end
 
-	def to_s()
-		return value.to_s()
-	end
 	def val()
 		return self
 	end
@@ -41,22 +51,23 @@ class FLOAT_C
 		end
 		@type = :FLOAT
 	end
+
 	def +(y)
 		return @value + y.value
 	end
+
 	def -(y)
 		return @value - y.value
 	end
+
 	def *(y)
 		return @value * y.value
 	end
+
 	def /(y)
 		return @value / y.value
 	end
 
-	def to_s()
-		return value.to_s()
-	end
 	def val()
 		return self
 	end
@@ -73,9 +84,7 @@ class STRING_C
 		end
 		@type = :STRING
 	end
-	def to_s()
-		return value.to_s()
-	end
+
 	def val()
 		return self
 	end
@@ -93,9 +102,6 @@ class BOOL_C
 		@type = :BOOL
 	end
 
-	def to_s()
-		return value.to_s()
-	end
 	def val()
 		return self
 	end
@@ -111,9 +117,7 @@ class FUNCTION_C
 		@params = params
 		@block = stmt_list
 	end
-	# def to_s()
-	# 	return self.val().to_s()
-	# end
+
 	def val(params = nil)
 		@@all_variables.push({})
 		@@current_scope += 1
@@ -137,9 +141,7 @@ class STMTLIST_C
 		@stmt = stmt
 		@stmt_list = stmt_list
 	end
-	def to_s()
-		self.val()
-	end
+
 	def val()
 		begin
 			if @stmt.is_a?(RETURN_C)

@@ -4,7 +4,9 @@ require_relative "cript_classes"
 
 ##############################################################################
 #
-# This part defines the Cript Language
+#						 Parser for the Cript++ Language
+#
+# 		Based on RDPARSE and built by Jimbj685 and Filer358 in 05/2018
 #
 ##############################################################################
 
