@@ -118,7 +118,6 @@ class LOOKUP_FUNC
 	end
 end
 
-
 class PRINT_C
 		def initialize(expr)
 				@expr = expr
@@ -130,6 +129,7 @@ class PRINT_C
 			r
 		end
 end
+
 	#	"""Arithmetics"""
 
 class ADD
@@ -144,12 +144,16 @@ class ADD
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
-			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				@value = FLOAT_C.new(@value1.val()+@value2.val())
+			@value1 = @value1.val()
+			@value2 = @value2.val()
+			if @value1.is_a?(FLOAT_C) and @value2.is_a?(FLOAT_C)
+				@value = FLOAT_C.new(@value1+@value2)
+				return @value
+			elsif @value1.is_a?(INTEGER_C) and @value2.is_a?(INTEGER_C)
+				@value = INTEGER_C.new(@value1+@value2)
 				return @value
 			else
-				@value = INTEGER_C.new(@value1.val()+@value2.val())
-				return @value
+				raise TypeError
 			end
 		else
 			return nil
@@ -169,11 +173,16 @@ class SUBTRACT
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
-			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				@value = FLOAT_C.new(@value1.val()-@value2.val())
+			@value1 = @value1.val()
+			@value2 = @value2.val()
+			if @value1.is_a?(FLOAT_C) and @value2.is_a?(FLOAT_C)
+				@value = FLOAT_C.new(@value1-@value2)
+				return @value
+			elsif @value1.is_a?(INTEGER_C) and @value2.is_a?(INTEGER_C)
+				@value = INTEGER_C.new(@value1-@value2)
 				return @value
 			else
-				return INTEGER_C.new(@value1.val()-@value2.val())
+				raise TypeError
 			end
 		else
 			return nil
@@ -194,12 +203,16 @@ class MULTIPLY
 
 	def val()
 		if @value1 != nil and @value2 != nil
-			if @value1.is_a?(FLOAT_C) or @value2.is_a?(FLOAT_C)
-				@value = FLOAT_C.new(@value1.val()*@value2.val())
+			@value1 = @value1.val()
+			@value2 = @value2.val()
+			if @value1.is_a?(FLOAT_C) and @value2.is_a?(FLOAT_C)
+				@value = FLOAT_C.new(@value1*@value2)
+				return @value
+			elsif @value1.is_a?(INTEGER_C) and @value2.is_a?(INTEGER_C)
+				@value = INTEGER_C.new(@value1*@value2)
 				return @value
 			else
-				@value = INTEGER_C.new(@value1.val()*@value2.val())
-				return @value
+				raise TypeError
 			end
 		else
 			return nil
@@ -219,7 +232,17 @@ class DIVIDE
 	end
 	def val()
 		if @value1 != nil and @value2 != nil
-			return FLOAT_C.new(@value1.val()/@value2.val())
+			@value1 = @value1.val()
+			@value2 = @value2.val()
+			if @value1.is_a?(FLOAT_C) and @value2.is_a?(FLOAT_C)
+				@value = FLOAT_C.new(@value1/@value2)
+				return @value
+			elsif @value1.is_a?(INTEGER_C) and @value2.is_a?(INTEGER_C)
+				@value = INTEGER_C.new(@value1/@value2)
+				return @value
+			else
+				raise TypeError
+			end
 		else
 			return nil
 		end

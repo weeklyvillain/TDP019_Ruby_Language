@@ -2,7 +2,11 @@
 class INTEGER_C
 	attr_accessor :value, :type
 	def initialize(value)
-		@value = value
+		if value.is_a?(Integer)
+			@value = value
+		else
+			raise TypeError
+		end
 		@type = :INT
 	end
 	def +(y)
@@ -30,7 +34,11 @@ end
 class FLOAT_C
 	attr_accessor :value, :type
 	def initialize(value)
-		@value = value
+		if value.is_a?(Float)
+			@value = value
+		else
+			raise TypeError
+		end
 		@type = :FLOAT
 	end
 	def +(y)
@@ -58,7 +66,11 @@ end
 class STRING_C
 	attr_accessor :value, :type
 	def initialize(value)
-		@value = value
+		if value.is_a?(String)
+			@value = value
+		else
+			raise TypeError
+		end
 		@type = :STRING
 	end
 	def to_s()
@@ -73,7 +85,11 @@ end
 class BOOL_C
 	attr_accessor :value,:type
 	def initialize(value)
-		@value = value
+		if value.is_a?(FalseClass) or value.is_a?(TrueClass)
+			@value = value
+		else
+			raise TypeError
+		end
 		@type = :BOOL
 	end
 

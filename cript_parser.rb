@@ -18,6 +18,12 @@ class Cript
 
 			token(/\/\/.*\n/)
 
+			rule :BOOL_STMT do
+				match(:TERM, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
+				match(:TERM, :OPERATOR, :EXPR){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
+				match(:TERM){|m| m }
+			end
+
 			#""" *** Separators *** """
 
 			token(/^\;/) { |m| m }
@@ -70,7 +76,7 @@ class Cript
 			#token(/</) {|m| m }
 			#token(/<=/) {|m| m }
 			token(/\w+/) { |m| m }
-			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
+			token(/["'][a-zA-Z\_\,\. 0-9]+["']/) { |m| m }
 			token(/./) { |m| m.to_s }
 
 			#""" *** Start of Statements *** """
@@ -164,8 +170,6 @@ class Cript
 				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m) }
-
-
 			end
 
 			rule :VARIABLE_TYPE do
@@ -177,8 +181,8 @@ class Cript
 			end
 
 			rule :STR do
-				match(/["'][a-zA-Z\_\,\. ]+["']/) { |m| STRING_C.new(m[1..-2]) }
-				match(/["']/, /["']/) { "" }
+				match(/["'][a-zA-Z\_\,\. 0-9]+["']/) { |m| STRING_C.new(m[1..-2]) }
+				match(/["']/, /["']/) { STRING_C.new("") }
 			end
 
 			rule :FUNC_CALL do

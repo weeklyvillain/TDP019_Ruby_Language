@@ -2,13 +2,23 @@
 // Run using "./cript_parser.rb <filename>"
 
 //Integer Testing
-    Integer int_a = 1;
+    Print("Integer Testing");
+
+    Integer int_a = 11;
     Integer int_b = 2;
     Integer int_c = int_a + int_b;
-    int_a + int_b;
-    int_a - int_b;
-    int_a * int_b;
-    int_a / int_b;
+    Print("     Test Add");
+    Print(int_a + int_b);
+    Print("");
+    Print("     Test Subtract");
+    Print(int_a - int_b);
+    Print("");
+        Print("     Test Multiply");
+    Print(int_a * int_b);
+    Print("");
+    Print("     Test Divide");
+    Print(int_a / int_b);
+    Print("");
 
 //Float Testing
     Float float_a = 1.1;
