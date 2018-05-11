@@ -51,7 +51,7 @@ Print("");
     }
 
 
-
+Wait(3);
 String test = Run("t.cript");
 Print(test);
 

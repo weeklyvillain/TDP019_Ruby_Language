@@ -64,6 +64,7 @@ class Cript
 			token(/While/) { |m| m }
 			token(/Print/) { |m| m }
 			token(/Run/) { |m| m }
+			token(/Wait/) { |m| m }
 
 
 
@@ -167,12 +168,13 @@ class Cript
 
 				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
-				match(Integer) { |m| INTEGER_C.new(m) }
+				match(:INT) { |m| m }
 				match(Float) { |m| FLOAT_C.new(m) }
 
 				match(:STR) { |m| m }
 				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
 				match(/Run/, /\(/, :STR, /\)/) { |_, _ , m, _| RUN_C.new(m)}
+				match(/Wait/, /\(/, :INT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m) }
 			end
@@ -185,6 +187,9 @@ class Cript
 				match(/String/) { |m| m.upcase }
 			end
 
+			rule :INT do
+				match(Integer) { |m| INTEGER_C.new(m) }
+			end
 			rule :STR do
 				match(/["'][a-zA-Z\_\,\. 0-9]+["']/) { |m| STRING_C.new(m[1..-2]) }
 				match(/["']/, /["']/) { STRING_C.new("") }

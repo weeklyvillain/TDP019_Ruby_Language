@@ -372,3 +372,14 @@ class RUN_C
 		r
 	end
 end
+
+class WAIT_C
+	def initialize(time)
+		@time = time.val().value
+	end
+
+	def val()
+		sleep(@time)
+		return self
+	end
+end
