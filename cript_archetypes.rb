@@ -101,20 +101,6 @@ class BOOL_C
 	end
 end
 
-#""" *** SUPER *** """
-class SUPER_C
-	attr_accessor :value,:type
-	def initialize (value)
-		@value = value
-		@type = :SUPER
-	end
-	def to_s()
-		return  @value.to_s()
-	end
-	def val()
-		return self
-	end
-end
 
 #""" *** FUNCTIONS *** """
 

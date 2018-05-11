@@ -61,6 +61,8 @@ class Cript
 			token(/Return/){ |m| m }
 			token(/While/) { |m| m }
 			token(/Print/) { |m| m }
+			token(/Run/) { |m| m }
+
 
 
 			#token(/For/) {|m| :FOR }
@@ -168,6 +170,7 @@ class Cript
 
 				match(:STR) { |m| m }
 				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
+				match(/Run/, /\(/, :STR, /\)/) { |_, _ , m, _| RUN_C.new(m)}
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m) }
 			end
@@ -214,8 +217,7 @@ class Cript
 				str = gets
 			end
 		else
-			@Cript.parse str
-			return
+			return @Cript.parse str
 		end
 	end
 
