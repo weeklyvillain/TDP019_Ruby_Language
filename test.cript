@@ -35,6 +35,9 @@ Print("Function Testing");
 Init foo(Integer a, Integer b){
     Return a * b;
 }
+
+Print(Randi(40, 100));
+Print(Randf(1000.5, 20000.1));
 Print(foo(13, 120));
 Print("");
 
@@ -51,7 +54,7 @@ Print("");
     }
 
 
-Wait(3);
+Wait(3.5);
 String test = Run("t.cript");
 Print(test);
 

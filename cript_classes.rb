@@ -29,7 +29,7 @@ class RAND_INT
 	end
 
 	def val()
-		return INTEGER_C.new(rand(start.val().value...stop.val().value))
+		return INTEGER_C.new(rand(@start.val().value...@stop.val().value))
 	end
 end
 
@@ -46,7 +46,7 @@ class RAND_FLOAT
 	end
 
 	def val()
-		return FLOAT_C.new(rand(start.val().value...stop.val().value))
+		return FLOAT_C.new(rand(@start.val().value...@stop.val().value))
 	end
 end
 

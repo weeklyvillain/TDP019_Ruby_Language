@@ -63,6 +63,8 @@ class Cript
 			token(/Print/) { |m| m }
 			token(/Run/) { |m| m }
 			token(/Wait/) { |m| m }
+			token(/Randi/) { |m| m }
+			token(/Randf/) { |m| m }
 
 
 
@@ -95,7 +97,7 @@ class Cript
 			rule :STMT do
 				match(:IFSTMT) { |m| m }
 				match(:LOOPSTMT){ |m| m }
-				match(/Return/, :EXPR, /;?/) { |_, m, _| RETURN_C.new(m) }
+				
 				match(:ASSIGN) { |m| m }
 				match(:EXPR, /;?/) { |m, _| m }
 
@@ -166,13 +168,19 @@ class Cript
 
 				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
-				match(:INT) { |m| m }
-				match(Float) { |m| FLOAT_C.new(m) }
+
+
 
 				match(:STR) { |m| m }
+				match(:INT) { |m| m }
+				match(:FLOAT) { |m| m }
 				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
 				match(/Run/, /\(/, :STR, /\)/) { |_, _ , m, _| RUN_C.new(m)}
+				match(/Randi/, /\(/, :INT, /\,/ , :INT,  /\)/){ |_, _, start, _, stop,  _| RAND_INT.new(start, stop) }
+				match(/Randf/, /\(/, :FLOAT, /\,/ , :FLOAT,  /\)/){ |_, _, start, _, stop, _| RAND_FLOAT.new(start, stop) }
 				match(/Wait/, /\(/, :INT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
+				match(/Wait/, /\(/, :FLOAT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
+				match(/Return/, :EXPR) { |_, m| RETURN_C.new(m) }
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m) }
 			end
@@ -185,12 +193,17 @@ class Cript
 				match(/String/) { |m| m.upcase }
 			end
 
-			rule :INT do
-				match(Integer) { |m| INTEGER_C.new(m) }
-			end
 			rule :STR do
 				match(/["'][a-zA-Z\_\,\. 0-9]+["']/) { |m| STRING_C.new(m[1..-2]) }
 				match(/["']/, /["']/) { STRING_C.new("") }
+			end
+
+			rule :INT do
+				match(Integer) { |m| INTEGER_C.new(m) }
+			end
+
+			rule :FLOAT do
+				match(Float) { |m| FLOAT_C.new(m) }
 			end
 
 			rule :FUNC_CALL do
