@@ -33,6 +33,10 @@
     }
 
 
+
+String test = Run("t.cript");
+Print(test);
+
 //Return Testing
     Return 1;
     Print(5);

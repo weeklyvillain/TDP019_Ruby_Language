@@ -123,7 +123,6 @@ class PRINT_C
 		def initialize(expr)
 				@expr = expr
 		end
-
 		def val()
 			r = @expr.val()
 			print(r.value, "\n")
@@ -342,7 +341,7 @@ class WHILE_C
 	end
 end
 
-#""" *** RETURN *** """
+#""" *** built-in *** """
 
 class RETURN_C
 	attr_accessor :value, :type
@@ -353,5 +352,23 @@ class RETURN_C
 
 	def val()
 		@value.val()
+	end
+end
+
+class RUN_C
+	def initialize(arg)
+		@arg = arg
+	end
+
+	def val()
+		parser = Cript.new
+		parser.log(false)
+		file = File.open(@arg.val.value, "r")
+		$all_variables.push({})
+		$current_scope += 1
+		r = parser.parser(file.read)
+		$all_variables.pop()
+		$current_scope -= 1
+		r
 	end
 end

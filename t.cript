@@ -1,0 +1,16 @@
+Print("a");
+Print("t.cript init");
+//Loop Testing
+    Integer x = 0;
+    Bool bool420 = True;
+    While(bool420){
+        Print(x);
+        If(x == 5){
+            bool420 = False;
+        }Else{
+            x = x + 1;
+        }
+    }
+
+//Return Testing
+    Return 1;
