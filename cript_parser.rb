@@ -45,8 +45,6 @@ class Cript
 
 			token(/Char/) { |m| m }
 
-
-
 			#""" *** Container Typing *** """
 
 			token(/String/) { |m| m }

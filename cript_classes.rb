@@ -14,7 +14,43 @@ $functions = [{}]
 $current_scope = 0
 $base_scope = 0
 
-		#""" Variable Handling """
+
+#####    Random     #####
+class RAND_INT
+	attr_accessor :value
+	def initialize(start, stop)
+		@value = 0
+		if start.is_a?(INTEGER_C) and stop.is_a?(INTEGER_C)
+			@start = start
+			@stop = stop
+		else
+			raise TypeError
+		end
+	end
+
+	def val()
+		return INTEGER_C.new(rand(start.val().value...stop.val().value))
+	end
+end
+
+class RAND_FLOAT
+	attr_accessor :value
+	def initialize(start, stop)
+		@value = 0
+		if start.is_a?(FLOAT_C) and stop.is_a?(FLOAT_C)
+			@start = start
+			@stop = stop
+		else
+			raise TypeError
+		end
+	end
+
+	def val()
+		return FLOAT_C.new(rand(start.val().value...stop.val().value))
+	end
+end
+
+#""" Variable Handling """
 
 #""" *** ASSIGN and LOOKUP *** """
 
