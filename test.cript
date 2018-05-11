@@ -29,6 +29,14 @@
 
 //If Testing
 
+// Functions testing
+Print("Function Testing");
+
+Init foo(Integer a, Integer b){
+    Return a * b;
+}
+Print(foo(13, 120));
+Print("");
 
 //Loop Testing
     Integer x = 0;

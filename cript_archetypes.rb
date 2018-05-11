@@ -119,18 +119,18 @@ class FUNCTION_C
 	end
 
 	def val(params = nil)
-		@@all_variables.push({})
-		@@current_scope += 1
+		$all_variables.push({})
+		$current_scope += 1
 		if params != nil
 			 (-1..@params.length - 1).each { |i|
-					@@all_variables[@@current_scope][@params[i][0]] = params[i]
+					$all_variables[$current_scope][@params[i][0]] = params[i]
 				}
 		end
 		r = @block
 		r = r.val()
 
-		@@all_variables.pop()
-		@@current_scope -= 1
+		$all_variables.pop()
+		$current_scope -= 1
 		return r
 	end
 end

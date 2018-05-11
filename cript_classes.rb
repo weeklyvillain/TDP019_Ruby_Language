@@ -115,7 +115,7 @@ class LOOKUP_FUNC
 		@params = params
 	end
 
-	def val(scope = @starting_scope)
+	def val(scope = $current_scope)
 		if $functions[scope].key?(@func_name)
 			$functions[scope][@func_name].val(@params)
 		else
