@@ -1,4 +1,4 @@
-// Testfile for Cript++ 
+// Testfile for Cript++
 // Run using "./cript_parser.rb <filename>"
 
 //Integer Testing
@@ -24,6 +24,7 @@
     Integer x = 0;
 
     While(bool1){
+        Print(x);
         If(x == 5){
             bool1 = False;
         }Else{
@@ -34,4 +35,4 @@
 
 //Return Testing
     Return 1;
-    Return 5;
+    Print(5);

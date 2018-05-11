@@ -1,27 +1,27 @@
 require_relative "cript_archetypes"
 
-@@all_variables = [{}]
-@@functions = [{}]
-@@current_scope = 0
-@@base_scope = 0
+$all_variables = [{}]
+$functions = [{}]
+$current_scope = 0
+$base_scope = 0
 
-		""" Variable Handling """
+		#""" Variable Handling """
 
-""" *** ASSIGN and LOOKUP *** """
+#""" *** ASSIGN and LOOKUP *** """
 
 class ASSIGN_VAR
-	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
-	def initialize (variable_type, variable_name, variable_value, scope)
+	attr_accessor :type, :variable_type, :variable_name, :variable_value
+	def initialize (variable_type, variable_name, variable_value)
 		@type = :ASSIGN_VAR
 		@variable_type = variable_type
 		@variable_name = variable_name
 		@variable_value = variable_value
-		@scope = scope
+		@scope = $current_scope
 	end
 	def val()
-		if !@@all_variables[@scope].key?(@variable_name)
-			@@all_variables[@scope][@variable_name] = @variable_value
-			return @@all_variables[@scope][@variable_name]
+		if !$all_variables[@scope].key?(@variable_name)
+			$all_variables[@scope][@variable_name] = @variable_value
+			return $all_variables[@scope][@variable_name]
 		else
 			puts("Trying to initialize a already existant variable!")
 			return nil
@@ -30,18 +30,17 @@ class ASSIGN_VAR
 end
 
 class LOOKUP_VAR
-	attr_accessor :variable_name, :starting_scope, :type
-	def initialize(variable_name, starting_scope)
+	attr_accessor :variable_name, :type
+	def initialize(variable_name)
 		@variable_name = variable_name
-		@starting_scope = starting_scope;
 		@type = :LOOKUP_VAR
 	end
 	def to_s
 		return self.val()
 	end
-	def val(scope = @@current_scope)
-		if @@all_variables[scope][@variable_name] != nil then
-			variable = @@all_variables[scope][@variable_name]
+	def val(scope = $current_scope)
+		if $all_variables[scope][@variable_name] != nil then
+			variable = $all_variables[scope][@variable_name]
 			if variable.is_a? LOOKUP_VAR then
 				variable = variable.val()
 				while variable.is_a? LOOKUP_VAR
@@ -63,18 +62,16 @@ class LOOKUP_VAR
 end
 
 class RE_VAR
-	attr_accessor :type, :variable_type, :variable_name, :variable_value, :scope
-	def initialize (variable_name, variable_value, scope)
+	attr_accessor :type, :variable_type, :variable_name, :variable_value
+	def initialize (variable_name, variable_value)
 		@type = :RE_VAR
 		@variable_name = variable_name
 		@variable_value = variable_value
-		@scope = scope
 	end
-	def val(scope = @@current_scope)
-		if @@all_variables[scope].has_key?(@variable_name) then
-			old_variable = @@all_variables[scope][@variable_name].val()
+	def val(scope = $current_scope)
+		if $all_variables[scope].has_key?(@variable_name) then
 			value = @variable_value.val()
-			r = @@all_variables[scope][@variable_name].value = value.value
+			r = $all_variables[scope][@variable_name].value = value.value
 			return r
 		else
 			if scope-1 >= 0
@@ -96,21 +93,20 @@ class ASSIGN_FUNC
 		@block = stmt_list
 	end
 	def val()
-		@@functions[@@current_scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block)
-		@@functions[@@current_scope][@func_name]
+		$functions[$current_scope][@func_name] = FUNCTION_C.new(@func_name, @params, @block)
+		$functions[$current_scope][@func_name]
 	end
 end
 
 class LOOKUP_FUNC
-	attr_accessor :func_name, :starting_scope
-	def initialize(func_name, starting_scope, params)
+	attr_accessor :func_name
+	def initialize(func_name, params)
 		@func_name = func_name
-		@starting_scope = starting_scope
 		@params = params
 	end
 	def val(scope = @starting_scope)
-		if @@functions[scope].key?(@func_name)
-			@@functions[scope][@func_name].val(@params)
+		if $functions[scope].key?(@func_name)
+			$functions[scope][@func_name].val(@params)
 		else
 			if scope-1 >= 0
 				self.val(scope-1)
@@ -129,19 +125,12 @@ class PRINT_C
 		end
 
 		def val()
-			if @expr.is_a? LOOKUP_VAR then
-				@expr = @expr.val()
-				while @expr.is_a? LOOKUP_VAR
-					@expr = @expr.val()
-				end
-				print(@expr.value, "\n")
-			else
-				print(@expr.val().value, "\n")
-			end
+			r = @expr.val()
+			print(r.value, "\n")
+			r
 		end
-
 end
-		"""Arithmetics"""
+	#	"""Arithmetics"""
 
 class ADD
 	attr_accessor :value
@@ -238,11 +227,11 @@ class DIVIDE
 end
 
 
-		""" Containers """
+		#""" Containers """
 
 
 
-""" *** ARRAY *** """
+#""" *** ARRAY *** """
 class ARRAY
 	attr_accessor :value, :type
 	def initialize(value)
@@ -255,7 +244,7 @@ class ARRAY
 end
 
 
-""" *** COMPARISONS *** """
+#""" *** COMPARISONS *** """
 
 class IF_C
 	attr_accessor :type
@@ -269,8 +258,8 @@ class IF_C
 		return self.val().to_s()
 	end
 	def val()
-		@@all_variables.push({})
-		@@current_scope += 1
+		$all_variables.push({})
+		$current_scope += 1
 		if @condition.val().value then
 			r = @block1.val()
 		else
@@ -280,14 +269,14 @@ class IF_C
 				r = nil
 			end
 		end
-		@@all_variables.pop()
-		@@current_scope -= 1
+		$all_variables.pop()
+		$current_scope -= 1
 		r
 
 	end
 end
 
-""" *** OPERATORS *** """
+#""" *** OPERATORS *** """
 
 class AND_C
 	def initialize(value1, value2)
@@ -332,7 +321,7 @@ class EQUALS_C
 end
 
 
-""" *** Loops *** """
+#""" *** Loops *** """
 class WHILE_C
 	attr_accessor :value, :type
 	def initialize(stmt_list, condition)
@@ -342,18 +331,18 @@ class WHILE_C
 	end
 
 	def val()
-		@@all_variables.push({})
-		@@current_scope += 1
+		$all_variables.push({})
+		$current_scope += 1
 		while @condition.val().value do
 			r = @block.val()
 		end
-		@@all_variables.pop()
-		@@current_scope -= 1
+		$all_variables.pop()
+		$current_scope -= 1
 		r
 	end
 end
 
-""" *** RETURN *** """
+#""" *** RETURN *** """
 
 class RETURN_C
 	attr_accessor :value, :type

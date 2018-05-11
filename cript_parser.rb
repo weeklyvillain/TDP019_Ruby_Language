@@ -11,18 +11,18 @@ require_relative "cript_classes"
 class Cript
 	def initialize
 		@Cript = Parser.new("Cript") do
-			""" *** Spaces and tabs *** """
+			#""" *** Spaces and tabs *** """
 
-			token(/[\s\n]+/)
+			token(/[\s]+/)
 			token(/\t+/)
 
 			token(/\/\/.*\n/)
 
-			""" *** Separators *** """
+			#""" *** Separators *** """
 
 			token(/^\;/) { |m| m }
 
-			""" *** Variable Typing *** """
+			#""" *** Variable Typing *** """
 
 			token(/Bool/) { |m| m }
 
@@ -39,12 +39,12 @@ class Cript
 
 
 
-			""" *** Container Typing *** """
+			#""" *** Container Typing *** """
 
 			token(/String/) { |m| m }
 			token(/Array/) { |m| m }
 
-			""" *** Keywords *** """
+			#""" *** Keywords *** """
 			token(/Init/) { |m| m }
 			token(/If/) { |m| m }
 			token(/Else/){ |m| m }
@@ -59,9 +59,9 @@ class Cript
 
 			#token(/For/) {|m| :FOR }
 
-			#token(/Console.Log/) {|m| m }
 
-			""" *** Operators *** """
+
+			#""" *** Operators *** """
 
 			#token(/>>/){|m|m}
 			#token(/!=/) {|m| m }
@@ -73,7 +73,7 @@ class Cript
 			token(/["'][a-zA-Z\_\,\. ]+["']/) { |m| m }
 			token(/./) { |m| m.to_s }
 
-			""" *** Start of Statements *** """
+			#""" *** Start of Statements *** """
 			start :PROGRAM do
 				match(:STMTLIST) { |m| m.val() unless m.class == nil }
 			end
@@ -105,10 +105,10 @@ class Cript
 					ASSIGN_FUNC.new(name, nil, stmt_list)
 				}
 				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
-					ASSIGN_VAR.new(type + "_C", name, value, @@current_scope)
+					ASSIGN_VAR.new(type + "_C", name, value)
 				}
 				match(:VARIABLE_NAME, "=", :EXPR, ";") { |name, _, value, _|
-					RE_VAR.new(name, value, @@current_scope)
+					RE_VAR.new(name, value)
 				}
 			end
 
@@ -163,7 +163,7 @@ class Cript
 				match(:STR) { |m| m }
 				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
 				match(:FUNC_CALL) {|m| m}
-				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m, @@current_scope) }
+				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m) }
 
 
 			end
@@ -182,8 +182,8 @@ class Cript
 			end
 
 			rule :FUNC_CALL do
-				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, @@current_scope, params) }
-				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, @@current_scope, nil) }
+				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, params) }
+				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, nil) }
 			end
 
 			rule :PARAM_LIST do
@@ -205,20 +205,12 @@ class Cript
 			print "[Cript++]~ "
 			str = gets
 			while !done(str)
-				if DEBUG_SHOW_VARIABLES
-					print_variable_table()
-					print_func_table()
-				end
-				puts  "=>#{@Cript.parse str}"
+				@Cript.parse str
 				print "[Cript++]~ "
 				str = gets
 			end
 		else
-			puts  "=>#{@Cript.parse str}"
-			if DEBUG_SHOW_VARIABLES
-				print_variable_table()
-				print_func_table()
-			end
+			@Cript.parse str
 			return
 		end
 	end
@@ -234,36 +226,13 @@ class Cript
 			@Cript.logger.level = Logger::WARN
 		end
 	end
-
-	def print_variable_table(state = true)
-		if state
-			@@all_variables.each_with_index { |scope_variables, scope|
-				puts "\nScope: " + scope.to_s
-				for x in 0..scope_variables.length - 1
-					print "\nVariable Name: " + scope_variables.keys[x].to_s + " {"
-					print "\n   Value: " + scope_variables[scope_variables.keys[x]].to_s + ","
-					print "\n   Datatype: " + scope_variables[scope_variables.keys[x]].type.to_s + "\n}\n\n"
-				end
-			}
-		end
-	end
-
-	def print_func_table(state = true)
-		if state
-			@@functions.each_with_index { |scope_funs, scope|
-				puts "\nScope: " + scope.to_s
-				for x in 0..scope_funs.length - 1
-					print "\nFunction Name: " + scope_funs.keys[x].to_s + " {"
-					print "\n	Params: " + scope_funs[scope_funs.keys[x]].params.to_s + "\n}\n\n"
-				end
-			}
-		end
-	end
 end
+
+
+
 
 if __FILE__ == $0
 	DEBUG = false
-	DEBUG_SHOW_VARIABLES = false
 	parser = Cript.new
 	parser.log(DEBUG)
 	if ARGV.empty?

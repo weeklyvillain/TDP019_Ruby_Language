@@ -1,4 +1,4 @@
-"""********** INTEGER **********"""
+#""********** INTEGER **********"""
 class INTEGER_C
 	attr_accessor :value, :type
 	def initialize(value)
@@ -26,7 +26,7 @@ class INTEGER_C
 	end
 end
 
-"""********** FLOAT **********"""
+#"""********** FLOAT **********"""
 class FLOAT_C
 	attr_accessor :value, :type
 	def initialize(value)
@@ -54,7 +54,7 @@ class FLOAT_C
 	end
 end
 
-""" *** STRING *** """
+#""" *** STRING *** """
 class STRING_C
 	attr_accessor :value, :type
 	def initialize(value)
@@ -69,7 +69,7 @@ class STRING_C
 	end
 end
 
-""" *** BOOL *** """
+#""" *** BOOL *** """
 class BOOL_C
 	attr_accessor :value,:type
 	def initialize(value)
@@ -85,7 +85,7 @@ class BOOL_C
 	end
 end
 
-""" *** SUPER *** """
+#""" *** SUPER *** """
 class SUPER_C
 	attr_accessor :value,:type
 	def initialize (value)
@@ -100,7 +100,7 @@ class SUPER_C
 	end
 end
 
-""" *** FUNCTIONS *** """
+#""" *** FUNCTIONS *** """
 
 class FUNCTION_C
 	attr_accessor :value, :block, :params
@@ -143,7 +143,7 @@ class STMTLIST_C
 			if @stmt.is_a?(RETURN_C)
 				raise Interrupt
 			end
-		rescue Interrupt => e
+		rescue Interrupt
 			return @stmt.val()
 		end
 		r = @stmt.val()
