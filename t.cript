@@ -1,5 +1,18 @@
-Array<Integer> a = [1,2,3];
-Array<Integer> b = [4,5,6];
-Array<Integer> d = [b,7,8];
-Array<Integer> c = [a,d];
-Print(c);
+Bool cond = True;
+Array<Integer> arr = [2, 2, 53, 12];
+
+Integer i = 0;
+
+While(cond){
+    Print(arr[i]);
+  	If(i == 3) {
+       	cond = False;
+    }
+    i = i + 1;
+}
+
+Init foo(Integer a, Integer b){
+    Return a * b;
+}
+
+Print(foo(21,31));

@@ -184,8 +184,9 @@ class Cript
 				match(/Array/) { |m| m.upcase }
 			end
 			rule :ARRAY do
-				match(:VARIABLE_NAME, /\[/, :INT, /\]/, /\=/, :TERM) { |name, _, index, _ , _ , new_value| RE_ARRAY_C.new(name, index, new_value) }
-				match(:VARIABLE_NAME, /\[/, :INT, /\]/) { |name, _, index, _| GET_ARRAY_C.new(name, index).value }
+
+				match(:VARIABLE_NAME, /\[/, :TERM, /\]/) { |name, _, index, _| GET_ARRAY_C.new(name, index) }
+				match(:VARIABLE_NAME, /\[/, :TERM, /\]/, /\=/, :TERM) { |name, _, index, _ , _ , new_value| RE_ARRAY_C.new(name, index, new_value) }
 				match(/Array/, /</, :VARIABLE_TYPE, />/, :VARIABLE_NAME, /\=/, /\[/, :ARRAY_LIST, /\]/) { |_, _, type, _, name, _, _, array_list, _ | ASSIGN_VAR.new("ARRAY_C", name, ARRAY_C.new(array_list.reverse, type))}
 			end
 
