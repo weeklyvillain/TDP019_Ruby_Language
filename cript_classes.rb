@@ -12,7 +12,6 @@ require_relative "cript_archetypes"
 $all_variables = [{}]
 $functions = [{}]
 $current_scope = 0
-$base_scope = 0
 
 
 #####    Random     #####
