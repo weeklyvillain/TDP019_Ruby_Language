@@ -410,15 +410,16 @@ end
 class GET_ARRAY_C
 	attr_accessor :value, :type
 	def initialize(array_name, index)
+		@variable_name = array_name
 		@value = nil
+		@index = index
 		@type = :GET_ARRAY
 	end
 
 	def val(scope = $current_scope)
 		if $all_variables[scope][@variable_name] != nil then
-			$all_variables[scope][@array_name].value[@index.val().value] = @value
-			@value = $all_variables[scope][@array_name].value[@index.val().value]
-			return self
+			@value = $all_variables[scope][@variable_name].value[@index.val().value]
+			return @value
 		else
 			return self.val(scope-1)
 		end
