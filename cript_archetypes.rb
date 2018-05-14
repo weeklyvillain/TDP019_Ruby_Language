@@ -107,7 +107,6 @@ class BOOL_C
 	end
 end
 
-
 #""" *** FUNCTIONS *** """
 
 class FUNCTION_C

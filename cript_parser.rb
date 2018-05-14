@@ -66,12 +66,6 @@ class Cript
 			token(/Randi/) { |m| m }
 			token(/Randf/) { |m| m }
 
-
-
-			#token(/For/) {|m| :FOR }
-
-
-
 			#""" *** Operators *** """
 
 			#token(/>>/){|m|m}
@@ -97,7 +91,7 @@ class Cript
 			rule :STMT do
 				match(:IFSTMT) { |m| m }
 				match(:LOOPSTMT){ |m| m }
-				
+
 				match(:ASSIGN) { |m| m }
 				match(:EXPR, /;?/) { |m, _| m }
 
@@ -157,7 +151,6 @@ class Cript
 				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
 				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
 				match(:BOOL_STMT){ |m| m}
-
 				match(:TERM)
 			end
 
@@ -165,12 +158,9 @@ class Cript
 				match("True") { |_| BOOL_C.new(true) }
 				match("False") { |_| BOOL_C.new(false) }
 				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val()) }
-
 				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
-
-
-
+				match(:ARRAY) { |m| m}
 				match(:STR) { |m| m }
 				match(:INT) { |m| m }
 				match(:FLOAT) { |m| m }
@@ -191,6 +181,12 @@ class Cript
 				match(/Float/) { |m| m.upcase }
 				match(/Char/) { |m| m.upcase }
 				match(/String/) { |m| m.upcase }
+				match(/Array/) { |m| m.upcase }
+			end
+			rule :ARRAY do
+				match(:VARIABLE_NAME, /\[/, :INT, /\]/, /\=/, :TERM) { |name, _, index, _ , _ , new_value| RE_ARRAY_C.new(name, index, new_value) }
+				match(:VARIABLE_NAME, /\[/, :INT, /\]/) { |name, _, index, _| GET_ARRAY_C.new(name, index).value }
+				match(/Array/, /</, :VARIABLE_TYPE, />/, :VARIABLE_NAME, /\=/, /\[/, :ARRAY_LIST, /\]/) { |_, _, type, _, name, _, _, array_list, _ | ASSIGN_VAR.new("ARRAY_C", name, ARRAY_C.new(array_list.reverse, type))}
 			end
 
 			rule :STR do
@@ -207,19 +203,43 @@ class Cript
 			end
 
 			rule :FUNC_CALL do
-				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _| LOOKUP_FUNC.new(name, params) }
+				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _|
+					LOOKUP_FUNC.new(name, params) }
 				match(:VARIABLE_NAME, /\(/, /\)/) { |name, _, _, _| LOOKUP_FUNC.new(name, nil) }
 			end
 
 			rule :PARAM_LIST do
-				match(:VARIABLE_TYPE, :VARIABLE_NAME, ',', :PARAM_LIST){ |type, name, _, n| [n]<<[name, type] }
-				match(:VARIABLE_TYPE, :VARIABLE_NAME){ |type, name| [name, type] }
+				match(:VARIABLE_TYPE, :VARIABLE_NAME, ',', :PARAM_LIST){ |type, name, _, n|
+					if n.is_a? Array
+						n.push([name, type])
+					else
+						[] << [[name, type]]
+					end
+				 }
+				match(:VARIABLE_TYPE, :VARIABLE_NAME){ |type, name| [] << [name, type] }
 				match(""){nil}
 			end
 
+			rule :ARRAY_LIST do
+				match(:TERM, ',', :ARRAY_LIST) { |m, _, n|
+					if n.is_a? Array
+						n << m
+					else
+				 		[n] << m
+					end
+				}
+				match(:TERM){ |m| [] << m }
+			end
+
 			rule :ARGUMENT_LIST do
-				match(:EXPR, ',', :ARGUMENT_LIST){ |m, _, n| [n] << m }
-				match(:EXPR){ |m| m }
+				match(:TERM, ',', :ARGUMENT_LIST){ |m, _, n|
+					if n.is_a? Array
+						n << m
+					else
+					 	[n] << m
+					end
+				}
+				match(:TERM){ |m| [] << m }
 				match(""){nil}
 	  		end
 		end

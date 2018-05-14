@@ -66,7 +66,7 @@ class ASSIGN_VAR
 
 	def val()
 		if !$all_variables[@scope].key?(@variable_name)
-			$all_variables[@scope][@variable_name] = @variable_value
+			$all_variables[@scope][@variable_name] = variable_value
 			return $all_variables[@scope][@variable_name]
 		else
 			puts("Trying to initialize a already existant variable!")
@@ -367,9 +367,51 @@ end
 
 #""" *** built-in *** """
 
+class ARRAY_C
+	attr_accessor :value, :type
+	def initialize(array_list, type = array_list[0].class)
+		@value = array_list
+		puts
+		print(@value)
+		puts
+		@type = :ARRAY
+	end
+
+	def val()
+		return self
+	end
+end
+
+class RE_ARRAY_C
+	attr_accessor :value, :type
+	def initialize(array_name, index, new_value)
+		@array_name = array_name
+		@index = index
+		@value = new_value
+		@type = :RE_ARRAY
+	end
+
+	def val()
+		$all_variables[$current_scope][@array_name].value[@index.val().value] = @value
+		return $all_variables[$current_scope][@array_name].value[@index.val().value]
+	end
+end
+
+class GET_ARRAY_C
+	attr_accessor :value, :type
+	def initialize(array_name, index)
+		@value = $all_variables[$current_scope][array_name].value[index.val().value]
+		@type = :GET_ARRAY
+	end
+
+	def val()
+		return self
+	end
+end
+
 class PRINT_C
 	def initialize(expr)
-			@expr = expr
+		@expr = expr
 	end
 
 	def val()
@@ -399,7 +441,7 @@ class RUN_C
 	def val()
 		parser = Cript.new
 		parser.log(false)
-		file = File.open(@arg.val.value, "r")
+		file = File.open(@arg.val().value, "r")
 		$all_variables.push({})
 		$current_scope += 1
 		r = parser.parser(file.read)
