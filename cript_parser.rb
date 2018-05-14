@@ -157,7 +157,7 @@ class Cript
 			rule :TERM do
 				match("True") { |_| BOOL_C.new(true) }
 				match("False") { |_| BOOL_C.new(false) }
-				match(/Not/, :EXPR) { |_ ,b| BOOL_C.new(!b.val()) }
+				match(/Not/, :EXPR) { |_ ,b| NOT_C.new(b) }
 				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
 				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
 				match(:ARRAY) { |m| m}

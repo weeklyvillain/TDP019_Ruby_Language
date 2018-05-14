@@ -343,6 +343,15 @@ class EQUALS_C
 	end
 end
 
+class NOT_C
+	def initialize(name)
+		@variable_name = name
+	end
+
+	def val()
+		return BOOL_C.new(!@variable_name.val())
+	end
+end
 
 #""" *** Loops *** """
 class WHILE_C
@@ -371,9 +380,6 @@ class ARRAY_C
 	attr_accessor :value, :type
 	def initialize(array_list, type = array_list[0].class)
 		@value = array_list
-		puts
-		print(@value)
-		puts
 		@type = :ARRAY
 	end
 
@@ -391,21 +397,31 @@ class RE_ARRAY_C
 		@type = :RE_ARRAY
 	end
 
-	def val()
-		$all_variables[$current_scope][@array_name].value[@index.val().value] = @value
-		return $all_variables[$current_scope][@array_name].value[@index.val().value]
+	def val(scope = $current_scope)
+		if $all_variables[scope][@variable_name] != nil then
+			$all_variables[scope][@array_name].value[@index.val().value] = @value
+			return $all_variables[scope][@array_name].value[@index.val().value]
+		else
+			return self.val(scope-1)
+		end
 	end
 end
 
 class GET_ARRAY_C
 	attr_accessor :value, :type
 	def initialize(array_name, index)
-		@value = $all_variables[$current_scope][array_name].value[index.val().value]
+		@value = nil
 		@type = :GET_ARRAY
 	end
 
-	def val()
-		return self
+	def val(scope = $current_scope)
+		if $all_variables[scope][@variable_name] != nil then
+			$all_variables[scope][@array_name].value[@index.val().value] = @value
+			@value = $all_variables[scope][@array_name].value[@index.val().value]
+			return self
+		else
+			return self.val(scope-1)
+		end
 	end
 end
 

@@ -11,7 +11,7 @@
 class INTEGER_C
 	attr_accessor :value, :type
 	def initialize(value)
-		if value.is_a?(Integer)
+		if value.class == Fixnum
 			@value = value
 		else
 			raise TypeError
@@ -44,7 +44,7 @@ end
 class FLOAT_C
 	attr_accessor :value, :type
 	def initialize(value)
-		if value.is_a?(Float)
+		if value.class == Float
 			@value = value
 		else
 			raise TypeError
@@ -77,7 +77,7 @@ end
 class STRING_C
 	attr_accessor :value, :type
 	def initialize(value)
-		if value.is_a?(String)
+		if value.class == String
 			@value = value
 		else
 			raise TypeError
@@ -94,7 +94,7 @@ end
 class BOOL_C
 	attr_accessor :value,:type
 	def initialize(value)
-		if value.is_a?(FalseClass) or value.is_a?(TrueClass)
+		if value == true or value == false
 			@value = value
 		else
 			raise TypeError

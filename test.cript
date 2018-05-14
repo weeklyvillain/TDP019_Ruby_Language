@@ -1,36 +1,34 @@
 // Testfile for Cript++
-// Run using "./cript_parser.rb <filename>"
+//
+
 
 //Integer Testing
     Print("Integer Testing");
 
-    Integer int_a = 11;
-    Integer int_b = 2;
-    Integer int_c = int_a + int_b;
-    Print("     Test Add");
-    Print(int_a + int_b);
-    Print("");
-    Print("     Test Subtract");
-    Print(int_a - int_b);
-    Print("");
-        Print("     Test Multiply");
-    Print(int_a * int_b);
-    Print("");
-    Print("     Test Divide");
-    Print(int_a / int_b);
-    Print("");
+
 
 //Float Testing
     Float float_a = 1.1;
     Float float_b = 2.1;
 
+//String Testing
+
+String hej = "Hello World";
+Print(hej);
+
 //Bool Testing
+    Print("Bool Testing");
     Bool bool1 = True;
+    Bool bool2 = False;
+    Bool bool3 = Not bool1;
+    Bool bool4 = Not bool2;
 
 //If Testing
 
 // Functions testing
 Print("Function Testing");
+
+
 
 Init foo(Integer a, Integer b){
     Return a * b;
