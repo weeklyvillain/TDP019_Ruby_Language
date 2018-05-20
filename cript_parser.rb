@@ -17,14 +17,7 @@ class Cript
 
 			token(/[\s]+/)
 			token(/\t+/)
-
 			token(/\/\/.*\n/)
-
-			rule :BOOL_STMT do
-				match(:TERM, :OPERATOR, :BOOL_STMT){|a, op, b| Object.const_get(op + "_C").new(a, b)}
-				match(:TERM, :OPERATOR, :EXPR){|a, op, b| Object.const_get(op+ "_C").new(a, b)}
-				match(:TERM){|m| m }
-			end
 
 			#""" *** Separators *** """
 
@@ -91,7 +84,6 @@ class Cript
 			rule :STMT do
 				match(:IFSTMT) { |m| m }
 				match(:LOOPSTMT){ |m| m }
-
 				match(:ASSIGN) { |m| m }
 				match(:EXPR, /;?/) { |m, _| m }
 
@@ -100,7 +92,6 @@ class Cript
 			rule :VARIABLE_NAME do
 				match(/[a-zA-Z]+[a-zA-Z\-\_0-9]*/) { |m| m }
 			end
-
 
 			rule :ASSIGN do
 				match(/Init/, :VARIABLE_NAME, /\(/, :PARAM_LIST, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, params, _, _, stmt_list, _|
@@ -116,8 +107,6 @@ class Cript
 					RE_VAR.new(name, value)
 				}
 			end
-
-
 
 			rule :IFSTMT do
 				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/, /Else/, /{/, :STMTLIST, /}/){
@@ -183,8 +172,8 @@ class Cript
 				match(/String/) { |m| m.upcase }
 				match(/Array/) { |m| m.upcase }
 			end
-			rule :ARRAY do
 
+			rule :ARRAY do
 				match(:VARIABLE_NAME, /\[/, :TERM, /\]/) { |name, _, index, _| GET_ARRAY_C.new(name, index) }
 				match(:VARIABLE_NAME, /\[/, :TERM, /\]/, /\=/, :TERM) { |name, _, index, _ , _ , new_value| RE_ARRAY_C.new(name, index, new_value) }
 				match(/Array/, /</, :VARIABLE_TYPE, />/, :VARIABLE_NAME, /\=/, /\[/, :ARRAY_LIST, /\]/) { |_, _, type, _, name, _, _, array_list, _ | ASSIGN_VAR.new("ARRAY_C", name, ARRAY_C.new(array_list.reverse, type))}
@@ -272,9 +261,6 @@ class Cript
 		end
 	end
 end
-
-
-
 
 if __FILE__ == $0
 	DEBUG = false

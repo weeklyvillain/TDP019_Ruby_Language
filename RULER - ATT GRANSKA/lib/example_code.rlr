@@ -1,0 +1,18 @@
+concept IsPlayer
+    query["self_type"] == "player"
+end
+
+concept IsAlive
+    query["self_hp"] > 0
+end
+
+concept ConceptNotSeenElf
+    query["self_race"] != "elf" && query["player_seen_elf"] == false
+end
+
+rule PlayerNotSeenElf
+    IsPlayer && ConceptNotSeenElf && IsAlive
+    say "HelloWorld"
+    increment 10
+    increment 5
+end

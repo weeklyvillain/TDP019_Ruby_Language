@@ -1,0 +1,28 @@
+concept IsPlayer
+    query["self_type"] == "player"
+end
+
+concept IsAlive
+    query["hp"] > 0
+end
+
+concept ConceptNotSeenElf
+    query["self_race"] != "elf" && query["player_seen_elf"] != true
+end
+
+rule PlayerNotSeenElf
+    ConceptSeenElf && IsPlayer
+    remember("player_seen_elf", true)
+    say("What is that? Looks like a human with pointy ears..?")
+    trigger("PlayerNotSeenElfD1", true)
+end
+
+rule Mechanic_PlayerNotSeenElfD1
+    PlayerNotSeenElfD1 && IsMechanic && IsAlive
+    say("That's an elf yo.")
+end
+
+rule Mechanic_PlayerNotSeenElfD1Angry
+    PlayerNotSeenElfD1 && IsMechanic && IsAlive && IsAngry
+    say("Are you stupid or something? Looks any regular elf to me.")
+end
