@@ -1,0 +1,14 @@
+Bool cond = True;
+Array<Integer> arr = [2, 2, 53, 12];
+
+Integer i = 0;
+
+While(cond){
+    Print(arr[i]);
+    
+  	If(i == 3) {
+       	cond = False;
+    }
+    
+    i = i + 1;
+}
