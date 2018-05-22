@@ -1,7 +1,5 @@
 class TokenScanner
   def initialize(tokens)
-    puts 
-    puts tokens
     @tokens = Assertions.not_nil(tokens)
     @index = 0
     @saved_indices = []
@@ -27,8 +25,6 @@ class TokenScanner
     token = get
     Assertions.check_type(token, type)
     adv
-    puts
-    puts token.value
     return token.value
   end
 
