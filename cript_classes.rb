@@ -12,42 +12,10 @@ require_relative "cript_archetypes"
 $all_variables = [{}]
 $functions = [{}]
 $current_scope = 0
+$return_values = {}
 
 
-#####    Random     #####
-class RAND_INT
-	attr_accessor :value
-	def initialize(start, stop)
-		@value = 0
-		if start.is_a?(INTEGER_C) and stop.is_a?(INTEGER_C)
-			@start = start
-			@stop = stop
-		else
-			raise TypeError
-		end
-	end
 
-	def val()
-		return INTEGER_C.new(rand(@start.val().value...@stop.val().value))
-	end
-end
-
-class RAND_FLOAT
-	attr_accessor :value
-	def initialize(start, stop)
-		@value = 0
-		if start.is_a?(FLOAT_C) and stop.is_a?(FLOAT_C)
-			@start = start
-			@stop = stop
-		else
-			raise TypeError
-		end
-	end
-
-	def val()
-		return FLOAT_C.new(rand(@start.val().value...@stop.val().value))
-	end
-end
 
 #""" Variable Handling """
 
@@ -60,16 +28,14 @@ class ASSIGN_VAR
 		@variable_type = variable_type
 		@variable_name = variable_name
 		@variable_value = variable_value
-		@scope = $current_scope
 	end
 
-	def val()
-		if !$all_variables[@scope].key?(@variable_name)
-			$all_variables[@scope][@variable_name] = variable_value
-			return $all_variables[@scope][@variable_name]
+	def val(scope = $current_scope)
+		if !$all_variables[scope].has_key?(@variable_name)
+			$all_variables[scope][@variable_name] = variable_value
+			return $all_variables[scope][@variable_name]
 		else
-			puts("Trying to initialize a already existant variable!")
-			return nil
+			raise ArgumentError.new("Trying to initialize " + @variable_name + " which is an already existant variable!")
 		end
 	end
 end
@@ -82,14 +48,14 @@ class LOOKUP_VAR
 	end
 
 	def val(scope = $current_scope)
-		if $all_variables[scope][@variable_name] != nil then
+		if $all_variables[scope].has_key? @variable_name then
 			variable = $all_variables[scope][@variable_name]
 			if variable.is_a? LOOKUP_VAR then
 				variable = variable.val()
 				while variable.is_a? LOOKUP_VAR
 					variable = variable.val()
 				end
-				return variable
+				return variable.val()
 			else
 				return variable.val()
 			end
@@ -97,8 +63,7 @@ class LOOKUP_VAR
 			if scope-1 >= 0
 				return self.val(scope-1)
 			else
-				puts("Variable does not exit!")
-				return nil
+				raise ArgumentError.new("Variable " + @variable_name + " does not exist!")
 			end
 		end
 	end
@@ -121,8 +86,7 @@ class RE_VAR
 			if scope-1 >= 0
 				return self.val(scope-1)
 			else
-				puts("Variable does not exit!")
-				return nil
+				raise ArgumentError.new("Variable " + @variable_name + " does not exist!")
 			end
 		end
 	end
@@ -151,13 +115,22 @@ class LOOKUP_FUNC
 	end
 
 	def val(scope = $current_scope)
-		if $functions[scope].key?(@func_name)
-			$functions[scope][@func_name].val(@params)
+		if $functions[scope].has_key? @func_name
+			function = $functions[scope][@func_name]
+			if function.is_a? LOOKUP_FUNC then
+				function = function.val()
+				while function.is_a? LOOKUP_FUNC
+					function = function.val()
+				end
+				return function.val(@params).val
+			else
+				return function.val(@params)
+			end	
 		else
 			if scope-1 >= 0
 				self.val(scope-1)
 			else
-				puts("Function does not exit!")
+				raise ArgumentError.new("Function " + @func_name + " does not exist!")
 				return nil
 			end
 		end
@@ -274,6 +247,41 @@ class DIVIDE
 	end
 end
 
+#####    Random     #####
+class RAND_INT
+	attr_accessor :value
+	def initialize(start, stop)
+		@value = 0
+		if start.is_a?(INTEGER_C) and stop.is_a?(INTEGER_C)
+			@start = start
+			@stop = stop
+		else
+			raise TypeError
+		end
+	end
+
+	def val()
+		return INTEGER_C.new(rand(@start.val().value...@stop.val().value))
+	end
+end
+
+class RAND_FLOAT
+	attr_accessor :value
+	def initialize(start, stop)
+		@value = 0
+		if start.is_a?(FLOAT_C) and stop.is_a?(FLOAT_C)
+			@start = start
+			@stop = stop
+		else
+			raise TypeError
+		end
+	end
+
+	def val()
+		return FLOAT_C.new(rand(@start.val().value...@stop.val().value))
+	end
+end
+
 #""" *** COMPARISONS *** """
 
 class IF_C
@@ -286,21 +294,15 @@ class IF_C
 	end
 
 	def val()
-		$all_variables.push({})
-		$current_scope += 1
 		if @condition.val().value then
-			r = @block1.val()
+			return @block1.val()
 		else
 			if @block2 != nil then
-				r = @block2.val()
+				return @block2.val()
 			else
-				r = nil
+				return nil
 			end
 		end
-		$all_variables.pop()
-		$current_scope -= 1
-		r
-
 	end
 end
 
@@ -314,7 +316,7 @@ class AND_C
 	end
 
 	def val()
-		return BOOL_C.new(@value1.value && @value2.value)
+		return BOOL_C.new(@value1.val().value && @value2.val().value)
 	end
 end
 
@@ -326,7 +328,7 @@ class OR_C
 	end
 
 	def val()
-		return BOOL_C.new(@value1.value || @value2.value)
+		return BOOL_C.new(@value1.val().value || @value2.val().value)
 	end
 end
 
@@ -397,7 +399,7 @@ class RE_ARRAY_C
 	end
 
 	def val(scope = $current_scope)
-		if $all_variables[scope][@variable_name] != nil then
+		if $all_variables[scope][@array_name] != nil then
 			$all_variables[scope][@array_name].value[@index.val().value] = @value
 			return $all_variables[scope][@array_name].value[@index.val().value]
 		else
@@ -431,11 +433,21 @@ class PRINT_C
 	end
 
 	def val()
-		r = @expr.val()
-		print(r.value, "\n")
-		r
+		r = @expr.val
+		if(r != nil)
+			print(r.value, "\n")
+			r
+		end
 	end
 end
+
+class ReturnException < StandardError
+	attr_accessor :object  
+	def initialize(object = nil)
+		self.object = object
+	end
+end
+  
 
 class RETURN_C
 	attr_accessor :value, :type
@@ -445,7 +457,8 @@ class RETURN_C
 	end
 
 	def val()
-		@value.val()
+		@value = @value.val()
+		raise ReturnException.new(@value)
 	end
 end
 
@@ -459,11 +472,17 @@ class RUN_C
 		parser.log(false)
 		file = File.open(@arg.val().value, "r")
 		$all_variables.push({})
+		$functions.push({})
 		$current_scope += 1
-		r = parser.parser(file.read)
-		$all_variables.pop()
-		$current_scope -= 1
-		r
+		begin
+			r = parser.parser(file.read)
+			$all_variables.pop()
+			$functions.pop()
+			$current_scope -= 1
+			return r
+		rescue ReturnException => e
+			return e.object.val()
+		end
 	end
 end
 

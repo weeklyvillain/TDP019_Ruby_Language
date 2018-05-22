@@ -5,14 +5,14 @@ Integer i = 0;
 
 While(cond){
     Print(arr[i]);
+    Wait(1);
   	If(i == 3) {
        	cond = False;
     }
     i = i + 1;
 }
 
-Init foo(Integer a, Integer b){
-    Return a * b;
-}
+Return i;
 
-Print(foo(21,31));
+
+

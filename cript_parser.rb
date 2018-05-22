@@ -9,6 +9,8 @@ require_relative "cript_classes"
 # 		Based on RDPARSE and built by Jimbj685 and Filer358 in 05/2018
 #
 ##############################################################################
+DEBUG = false
+
 
 class Cript
 	def initialize
@@ -68,7 +70,7 @@ class Cript
 			#token(/</) {|m| m }
 			#token(/<=/) {|m| m }
 			token(/\w+/) { |m| m }
-			token(/["'][a-zA-Z\_\,\. 0-9]+["']/) { |m| m }
+			token(/["'][a-zåäöA-ZÅÄÖ\_\,\.\! 0-9]+["']/) { |m| m }
 			token(/./) { |m| m.to_s }
 
 			#""" *** Start of Statements *** """
@@ -77,14 +79,15 @@ class Cript
 			end
 
 			rule :STMTLIST do
-				match(:STMT, :STMTLIST) { |s, sl| STMTLIST_C.new(s,sl) }
+				match(:STMT, :STMTLIST) { |s, sl| STMTLIST_C.new(s, sl) }
 				match(:STMT) { |s| STMTLIST_C.new(s,nil) }
 			end
 
 			rule :STMT do
-				match(:IFSTMT) { |m| m }
-				match(:LOOPSTMT){ |m| m }
-				match(:ASSIGN) { |m| m }
+				match(:BUILT_IN, /;?/) { |m| m }
+				match(:IFSTMT, /;?/) { |m| m }
+				match(:LOOPSTMT, /;?/) { |m| m }
+				match(:ASSIGN, /;?/) { |m, _| m }
 				match(:EXPR, /;?/) { |m, _| m }
 
 			end
@@ -100,20 +103,20 @@ class Cript
 				match(/Init/, :VARIABLE_NAME, /\(/, /\)/, /{/, :STMTLIST, /}/) {|_, name, _, _, _, stmt_list, _|
 					ASSIGN_FUNC.new(name, nil, stmt_list)
 				}
-				match(:VARIABLE_TYPE, :VARIABLE_NAME, "=", :EXPR, ";") { |type, name, _, value, _|
+				match(:VARIABLE_TYPE, :VARIABLE_NAME, /\=/, :EXPR) { |type, name, _, value|
 					ASSIGN_VAR.new(type + "_C", name, value)
 				}
-				match(:VARIABLE_NAME, "=", :EXPR, ";") { |name, _, value, _|
+				match(:VARIABLE_NAME, /\=/, :EXPR) { |name, _, value|
 					RE_VAR.new(name, value)
 				}
 			end
 
 			rule :IFSTMT do
-				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/, /Else/, /{/, :STMTLIST, /}/){
+				match(/If/, /\(/, :BOOL_STMT, /\)/, /\{/, :STMTLIST, /\}/, /Else/, /\{/, :STMTLIST, /\}/){
 					|_, _, bool_stmt, _, _, stmt_list1, _, _, _, stmt_list2, _|
 						IF_C.new(bool_stmt, stmt_list1, stmt_list2)
 					}
-				match(/If/, /\(/, :BOOL_STMT, /\)/, /{/, :STMTLIST, /}/){
+				match(/If/, /\(/, :BOOL_STMT, /\)/, /\{/, :STMTLIST, /\}/){
 					 |_, _, bool_stmt, _, _, stmt_list, _|
 					 IF_C.new(bool_stmt, stmt_list, nil)
 					}
@@ -127,7 +130,7 @@ class Cript
 			end
 
 			rule :LOOPSTMT do
-				match(/While/, "(", :BOOL_STMT, ")", "{", :STMTLIST, "}") { |_, _, cond, _, _, stmt, _| WHILE_C.new(stmt, cond) }
+				match(/While/, /\(/, :BOOL_STMT, /\)/, /\{/, :STMTLIST, /\}/) { |_, _, cond, _, _, stmt, _| WHILE_C.new(stmt, cond) }
 			end
 
 			rule :OPERATOR do
@@ -137,32 +140,36 @@ class Cript
 			end
 
 			rule :EXPR do
-				match(:EXPR, "+", :TERM) { |a, _, b, _| ADD.new(a, b) }
-				match(:EXPR, "-", :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
+
+				match(:EXPR, /\+/, :TERM) { |a, _, b, _| ADD.new(a, b) }
+				match(:EXPR, /\-/, :TERM) { |a, _, b, _| SUBTRACT.new(a, b) }
 				match(:BOOL_STMT){ |m| m}
 				match(:TERM)
 			end
 
 			rule :TERM do
-				match("True") { |_| BOOL_C.new(true) }
-				match("False") { |_| BOOL_C.new(false) }
-				match(/Not/, :EXPR) { |_ ,b| NOT_C.new(b) }
-				match(:TERM, "*", :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
-				match(:TERM, "/", :EXPR) { |a, _, b| DIVIDE.new(a, b) }
+				match(:TERM, /\*/, :EXPR) { |a, _, b| MULTIPLY.new(a, b) }
+				match(:TERM, /\//, :EXPR) { |a, _, b| DIVIDE.new(a, b) }
 				match(:ARRAY) { |m| m}
 				match(:STR) { |m| m }
 				match(:INT) { |m| m }
 				match(:FLOAT) { |m| m }
-				match(/Print/, /\(/, :EXPR, /\)/) { |_, _, m, _| PRINT_C.new(m) }
-				match(/Run/, /\(/, :STR, /\)/) { |_, _ , m, _| RUN_C.new(m)}
-				match(/Randi/, /\(/, :INT, /\,/ , :INT,  /\)/){ |_, _, start, _, stop,  _| RAND_INT.new(start, stop) }
-				match(/Randf/, /\(/, :FLOAT, /\,/ , :FLOAT,  /\)/){ |_, _, start, _, stop, _| RAND_FLOAT.new(start, stop) }
-				match(/Wait/, /\(/, :INT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
-				match(/Wait/, /\(/, :FLOAT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
-				match(/Return/, :EXPR) { |_, m| RETURN_C.new(m) }
+				match(:BOOL) { |m| m }
 				match(:FUNC_CALL) {|m| m}
 				match(:VARIABLE_NAME) { |m| LOOKUP_VAR.new(m) }
 			end
+
+			rule :BUILT_IN do
+				match(/Print/, "(", :EXPR, ")") { |_, _, m, _| PRINT_C.new(m) }
+				match(/Run/, /\(/, :STR, /\)/) { |_, _ , m, _| RUN_C.new(m)}
+				match(/Randi/, /\(/, :INT, /\,/ , :INT,  /\)/){ |_, _, start, _, stop,  _| RAND_INT.new(start, stop) }
+				match(/Randf/, /\(/, :FLOAT, /\,/ , :FLOAT,  /\)/){ |_, _, start, _, stop, _| RAND_FLOAT.new(start, stop) }
+				match(/Not/, :EXPR) { |_ ,b| NOT_C.new(b) }
+				match(/Wait/, /\(/, :INT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
+				match(/Wait/, /\(/, :FLOAT, /\)/) { |_, _, m, _| WAIT_C.new(m) }
+				match(/Return/, :EXPR) { |_, m| RETURN_C.new(m) }
+			end
+
 
 			rule :VARIABLE_TYPE do
 				match(/Bool/) { |m| m.upcase }
@@ -174,13 +181,13 @@ class Cript
 			end
 
 			rule :ARRAY do
+				match(:VARIABLE_NAME, /\[/, :TERM, /\]/, /\=/, :EXPR) { |name, _, index, _ , _ , new_value| RE_ARRAY_C.new(name, index, new_value) }
 				match(:VARIABLE_NAME, /\[/, :TERM, /\]/) { |name, _, index, _| GET_ARRAY_C.new(name, index) }
-				match(:VARIABLE_NAME, /\[/, :TERM, /\]/, /\=/, :TERM) { |name, _, index, _ , _ , new_value| RE_ARRAY_C.new(name, index, new_value) }
 				match(/Array/, /</, :VARIABLE_TYPE, />/, :VARIABLE_NAME, /\=/, /\[/, :ARRAY_LIST, /\]/) { |_, _, type, _, name, _, _, array_list, _ | ASSIGN_VAR.new("ARRAY_C", name, ARRAY_C.new(array_list.reverse, type))}
 			end
 
 			rule :STR do
-				match(/["'][a-zA-Z\_\,\. 0-9]+["']/) { |m| STRING_C.new(m[1..-2]) }
+				match(/["'][a-zåäöA-ZÅÄÖ\_\,\.\! 0-9]+["']/) { |m| STRING_C.new(m[1..-2]) }
 				match(/["']/, /["']/) { STRING_C.new("") }
 			end
 
@@ -191,6 +198,12 @@ class Cript
 			rule :FLOAT do
 				match(Float) { |m| FLOAT_C.new(m) }
 			end
+			
+			rule :BOOL do
+				match(/True/) { |_| BOOL_C.new(true) }
+				match(/False/) { |_| BOOL_C.new(false) }
+			end
+
 
 			rule :FUNC_CALL do
 				match(:VARIABLE_NAME, /\(/, :ARGUMENT_LIST, /\)/) { |name, _, params, _|
@@ -199,7 +212,7 @@ class Cript
 			end
 
 			rule :PARAM_LIST do
-				match(:VARIABLE_TYPE, :VARIABLE_NAME, ',', :PARAM_LIST){ |type, name, _, n|
+				match(:VARIABLE_TYPE, :VARIABLE_NAME, /\,/, :PARAM_LIST){ |type, name, _, n|
 					if n.is_a? Array
 						n.push([name, type])
 					else
@@ -207,7 +220,7 @@ class Cript
 					end
 				 }
 				match(:VARIABLE_TYPE, :VARIABLE_NAME){ |type, name| [] << [name, type] }
-				match(""){nil}
+				match(//){nil}
 			end
 
 			rule :ARRAY_LIST do
@@ -222,14 +235,14 @@ class Cript
 			end
 
 			rule :ARGUMENT_LIST do
-				match(:TERM, ',', :ARGUMENT_LIST){ |m, _, n|
+				match(:EXPR, ',', :ARGUMENT_LIST){ |m, _, n|
 					if n.is_a? Array
 						n << m
 					else
 					 	[n] << m
 					end
 				}
-				match(:TERM){ |m| [] << m }
+				match(:EXPR){ |m| [] << m }
 				match(""){nil}
 	  		end
 		end
@@ -263,7 +276,6 @@ class Cript
 end
 
 if __FILE__ == $0
-	DEBUG = false
 	parser = Cript.new
 	parser.log(DEBUG)
 	if ARGV.empty?

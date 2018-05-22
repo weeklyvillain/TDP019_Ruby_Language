@@ -1,1 +1,15 @@
-Print(1+1);
+Init func1(Integer func1a){
+    Return func1a - 1;
+};
+
+
+Init func2(Integer func2a){
+    If(func2a == 0){
+        Return 2;
+    };
+    Return func1(func2a);
+};
+
+Integer a = func1(2);
+Integer b = func2(a);
+Print(b);

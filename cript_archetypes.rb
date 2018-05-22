@@ -119,18 +119,22 @@ class FUNCTION_C
 
 	def val(params = nil)
 		$all_variables.push({})
+		$functions.push({})
 		$current_scope += 1
-		if params != nil
-			 (-1..@params.length - 1).each { |i|
-					$all_variables[$current_scope][@params[i][0]] = params[i]
-				}
+		if params != nil && @params != nil
+			(-1..@params.length - 1).each { |i|
+				$all_variables[$current_scope].store(@params[i][0], params[i])
+			}
 		end
-		r = @block
-		r = r.val()
-
-		$all_variables.pop()
-		$current_scope -= 1
-		return r
+		begin
+			r = @block.val()
+			$all_variables.pop()
+			$functions.pop()
+			$current_scope -= 1
+			return r
+		rescue ReturnException => e
+			return e.object.val()
+		end
 	end
 end
 
@@ -142,16 +146,9 @@ class STMTLIST_C
 	end
 
 	def val()
-		begin
-			if @stmt.is_a?(RETURN_C)
-				raise Interrupt
-			end
-		rescue Interrupt
-			return @stmt.val()
-		end
 		r = @stmt.val()
 		if @stmt_list != nil
-			@stmt_list.val()
+			return @stmt_list.val()
 		else
 			return r
 		end
