@@ -1,0 +1,47 @@
+14/02
+Git repo skapas samt README.md läggs till.
+
+09/04
+Basic-BNF skapad och tillagd på git.
+
+11/04
+En början på språket (parser osv).
+
+14/04
+Påbörjade Assignment klass för att kunna skapa variabler.
+
+16/04
+Assignment fungerar man kan tilldela variabler.
+
+23/04
+Funktioner påbörjade samt ett eget debug läge för att lättare förstå vad som händer.
+
+24/04
+Merge fel, manuellt fixad.
+
+27/04
+Scope tillagd för funktioner och variabler.
+
+02/05
+Aritmetik påbörjad.
+
+07/05
+If-satser och aritmetik funkar.
+
+08/05
+Saker funkar andra saker gick sönder som vanligt.
+
+09/05
+Nu funkar trasiga saker igen.
+
+10/05
+Else funkar nu.
+
+11/05
+val returnerar nu self på våra typer samt några inbyggda funktioner tillagda.
+
+14/05
+La till array.
+
+
+
