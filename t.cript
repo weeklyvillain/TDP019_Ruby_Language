@@ -6,13 +6,11 @@ Integer i = 0;
 While(cond){
     Print(arr[i]);
     Wait(1);
-  	If(i == 3) {
+  	If(i == 4) {
        	cond = False;
-    }
-    i = i + 1;
-}
-
-Return i;
+    };
+    i = i + 2;
+};
 
 
 

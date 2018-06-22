@@ -8,14 +8,10 @@ require_relative "cript_archetypes"
 #
 ##############################################################################
 
-
 $all_variables = [{}]
 $functions = [{}]
 $current_scope = 0
 $return_values = {}
-
-
-
 
 #""" Variable Handling """
 

@@ -12,7 +12,5 @@ end
 
 rule PlayerNotSeenElf
     IsPlayer && ConceptNotSeenElf && IsAlive
-    say "HelloWorld"
-    increment 10
-    increment 5
+    chess
 end

@@ -1,0 +1,95 @@
+Här är förslag på punkter att tas upp:
+
+Beroende på val av språk och verktyg som implementeras kan frågorna vara mer eller mindre relevanta.
+
+Ni skriver ett dokument med svar på de relevanta granskningsfrågorna.
+
+    Det skapade datorspråket - Ruler
+        
+        Verkar språket uppfylla de krav som språket är tänkt att användas till?
+            Ja, fast det lämnar väldigt mycket till den enskilda programmeraren att göra själv.
+        
+        Egna synpunkter på språket. Dess syntax och semantik.
+            Syntaxen är väldigt lik hashes i ruby vilket leder till en ihopblandning när man sedan hanterar kontexen i ruby.
+            Den egna parsern är intressant men ses till viss del som utanför scopet för Projektet. 
+            Tiden som lades på den skulle ha kunnat läggas på att utveckla språkets funktionalitet mer istället för den väldigt
+            grundläggande implementation som finns idag.
+
+        Användarhandledningen. Är det möjligt att förstå hur språket fungerar och kan man enkelt lära sig det 
+        genom att läsa manualen? Finns bra exempel? 
+            Det är möjligt att förstå hur språket fungerar genom att läsa handledningen. 
+            Det enda vi känner är att det bör ha funnits ett installations moment så man vet vilken version av ruby som krävs samt 
+            hur demo kod körs.
+    
+    Språkbeskrivningen med grammatik
+        Grammatiken. Verkar den vara korrekt, välskriven 
+        och ha korrekta benämningar på de olika språkkonstruktionerna?
+            Grammatiken upplevs som korrekt och välskriven. Den har korrekta benämningar på konstruktioner
+
+        Överensstämmer beskrivningen av språket med grammatiken?
+            Ja
+        
+        Finns det konstruktioner i språket som grammatiken ej verkar ta upp,
+        eller beskriver grammatiken möjliga konstruktioner, som språket ej verkar kunna hantera.
+            Det som finns i BNF:en finns implementerat i språket och tvärt om. Dock kan det skapas mer funktionalitet med 
+            en blandning av konstruktionerna som ej representeras i grammatiken.
+
+        Ger systembeskrivningen en bra bild på hur implementeringen ser ut? 
+            Ja det gör den.
+
+    Implementering av verktyg eller användning av verktyg för språket
+        Det implementerade systemet (interpretator, kompilator, översättare av notation mm). 
+        Verkar det vara en bra modell?
+            Det verkar vara en fungerande modell. Inga synpunkter
+        
+        Implementering av egna eller användning av existerande verktyg (lexer/parser etc).
+        Verkar verktyget lämpat för uppgiften? Är verktyget använt på ett bra sätt?
+        Finns det begränsningar i verktyget, som gör det svårt att implementera datorspråket? 
+            Verktyget är skrivet specifikt för den här uppgiften och uppfyller sin funktion på ett bra sätt.
+    
+    Metoder och algoritmer.
+        Synpunkter på valda metoder och algoritmer, verkar de vara bra val? Kan det bli mycket ineffektivt? 
+        Finns det alternativ, som hade blivit bättre? 
+            Desto större context som ges desto segare bör runtimen bli. Därför känns implementationen ineffektiv men vi har ej
+            något sätt att förbättra den.
+    
+    Koden för implementeringen i Ruby.
+        Är koden bra modulariserad? Kan man särskilja de olika delarna som programmet består utav och de olika algoritmerna.
+            Ja, Allting ligger i sina egna filer och de är oberoende av varandra.
+
+        Finns det en överensstämmelse mellan hur grammatiken är beskriven och motsvarande strukturer 
+        och kod i programmet.
+            Det finns väldigt bra överensstämmelse mellan grammatiken och koden.
+        
+        Är koden läsbar och förståelig för dig som läsare? Val av namn på olika storheter (identifierare
+        för variabler, klasser, metoder/funktioner/procedurer mm).
+            Ja, namn är bra och koden är läsbar
+
+        Ta gärna ut en del som du tycker var bra och motivera varför.
+            Nej
+
+        Ta gärna ut en del som du tycker var dåligt / som du inte alls enkelt kan förstå och motivera varför.
+            Nej
+
+        Har Ruby använts på ett bra sätt? Har ni alternativa förslag på hur man kan använda andra 
+        Ruby-konstruktioner. 
+            Ja, nej
+    
+    Testkörning av språket
+        Var det lätt att komma igång med systemet?
+            Vi hade problem med ruby 2.3.1 där programmet ger ett error meddelande istället för dess funktionalitet
+            "to_rlr" kan ej map 1 to ruler object
+            
+        Är det lätt att skriva program i språket? Ger användarhandledningen stöd för detta?
+            Nej, problemet ligger i att koda i både ruby och Ruler vilket är jobbigt
+
+        Visade egna testkörningar på några problem? Felaktigheter uppstår vid felaktig kod i datorspråket.
+            Strängar kan ej innehålla " ".
+            Parsar ej floats överhuvudtaget
+            Hanterar felaktiga namn på saker i allmänhet
+            Skapat egen syntax error klass
+
+            Utöver detta så saknar språket ett djup utöver det djup som lambda funktioner med ruby kod ger.
+
+        Finns oklarheter i konstruktioner, vad som borde hända? 
+            Nej
